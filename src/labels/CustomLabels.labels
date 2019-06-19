@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>CS_PageMessagesConfirm</fullName>
+        <categories>PageMessages</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CS_PageMessagesConfirm</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>CS_PageMessagesError</fullName>
+        <categories>PageMessages</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CS_PageMessagesError</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>CS_PageMessagesFatal</fullName>
+        <categories>PageMessages</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CS_PageMessagesFatal</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>CS_PageMessagesWarning</fullName>
+        <categories>PageMessages</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CS_PageMessagesWarning</shortDescription>
+        <value>Warning</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelButtonCancel</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>label for the Cancel button used on several pages.</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelButtonClose</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>label for the Close button on various pages</shortDescription>
+        <value>Close</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelButtonSave</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>The label for the Save button used on several pages.</shortDescription>
+        <value>Save</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelButtonSubscribe</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>The label for the Subscribe button used on several pages.</shortDescription>
+        <value>Subscribe</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelButtonSaveAndClose</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>label for the Save and Close button used on several pages</shortDescription>
+        <value>Save &amp; Close</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelContactSubscriptionErrorOnSave</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>error message when Contact Subscription save fails.</shortDescription>
+        <value>Errors were encountered trying to save the Requests.</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelContactSubscriptionHelp</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>help text for the Contact Subscription page</shortDescription>
+        <value>Update contact fields and manage contact subscriptions.  Update all data as appropriate, and then click Save.</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelContactSubscriptionSaveSuccess</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>message displayed when Contact Subscription  saves successfully.</shortDescription>
+        <value>Records have been saved.</value>
+    </labels>
+    <labels>
+        <fullName>CS_labelContactSubscriptionTitle</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>title for the Contact Subscription page</shortDescription>
+        <value>Contact Subscription </value>
+    </labels>
+</CustomLabels>
