@@ -2,11 +2,11 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Contact Subscription Automation</fullName>
     <types>
-        <members>C501_CTRL_ContactSubscription</members>
-        <members>C501_CTRL_ContactSubscription_TEST</members>
         <members>C501_CS_ListView_Controller</members>
         <members>C501_CS_ListView_Controller_TEST</members>
         <members>C501_CS_UTIL_PageMessages_CTRL</members>
+        <members>C501_CTRL_ContactSubscription</members>
+        <members>C501_CTRL_ContactSubscription_TEST</members>
         <name>ApexClass</name>
     </types>
     <types>
@@ -20,6 +20,10 @@
         <name>ApexPage</name>
     </types>
     <types>
+        <members>CampaignMember.C501_CS_Action__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
         <members>CS_PageMessagesConfirm</members>
         <members>CS_PageMessagesError</members>
         <members>CS_PageMessagesFatal</members>
@@ -29,8 +33,8 @@
         <members>CS_labelButtonSave</members>
         <members>CS_labelButtonSaveAndClose</members>
         <members>CS_labelButtonSubscribe</members>
-        <members>CS_labelContactSubscriptionHelp</members>
         <members>CS_labelContactSubscriptionErrorOnSave</members>
+        <members>CS_labelContactSubscriptionHelp</members>
         <members>CS_labelContactSubscriptionHelp</members>
         <members>CS_labelContactSubscriptionSaveSuccess</members>
         <members>CS_labelContactSubscriptionTitle</members>
@@ -39,10 +43,6 @@
     <types>
         <members>CustomLabels</members>
         <name>CustomLabels</name>
-    </types>
-    </types>
-        <members>CampaignMember.C501_CS_Action__c</members>
-        <name>CustomField</name>
     </types>
     <types>
         <members>Contact.ContactSubscription</members>

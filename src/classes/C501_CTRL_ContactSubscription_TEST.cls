@@ -46,12 +46,13 @@ public class C501_CTRL_ContactSubscription_TEST {
     @isTest(SeeAllData='true')
     public static void NewContactTest() {
 
+        Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
+        System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
+
         Test.StartTest();
 
-        //point to our VF page
-        PageReference p = new PageReference('Page.ContactSubscription');
-        
-        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription();
+        Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
+        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
 
         System.Assert(ctrl.listContactSubscriptions.size() > 0);
 
@@ -70,17 +71,13 @@ public class C501_CTRL_ContactSubscription_TEST {
     @isTest(SeeAllData='true')
     public static void EditContactTest() {
 
-        Id contactId = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1].Id;
-        System.Debug('*****EditContactTest - contactId: ' + contactId);
+        Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
+        System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
 
         Test.StartTest();
 
-        //point to our VF page
-        PageReference p = new PageReference('Page.ContactSubscription');
-        p.getParameters().put('Id', contactId);
-        Test.setCurrentPageReference(p);
-        
-        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription();
+        Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
+        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
 
         System.Assert(ctrl.listContactSubscriptions.size() > 0);
 

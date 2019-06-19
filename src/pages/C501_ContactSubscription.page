@@ -28,7 +28,7 @@
     POSSIBILITY OF SUCH DAMAGE.
 -->  
  
-<apex:page controller="C501_CTRL_ContactSubscription" title="{!$Label.CS_labelContactSubscriptionTitle}" tabStyle="Contact" standardStylesheets="true" sidebar="false">
+<apex:page standardController="Contact" extensions="C501_CTRL_ContactSubscription" title="{!$Label.CS_labelContactSubscriptionTitle}" tabStyle="Contact" standardStylesheets="true">
     <apex:stylesheet value="{!URLFOR($Resource.sfdo213, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
     <apex:stylesheet value="{!URLFOR($Resource.v4sStaticResources, '/v4s_slds/v4s-common.css')}" />
 
@@ -117,13 +117,13 @@
 
                 <apex:column styleClass="myTD reference" >
                     <apex:facet name="header">Subscription</apex:facet>
-                    <apex:outputField value="{!ContactSubscription.Campaign.Name}" styleClass="text" >
+                    <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
                     </apex:outputField>
                 </apex:column> 
 
                 <apex:column styleClass="myTD reference" >
                     <apex:facet name="header">Subscription Parent</apex:facet>
-                    <apex:outputField value="{!ContactSubscription.Campaign.Parent.Name}" styleClass="text" >
+                    <apex:outputField value="{!ContactSubscription.Parent.Name}" styleClass="text" >
                     </apex:outputField>
                 </apex:column> 
 

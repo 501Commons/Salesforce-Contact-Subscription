@@ -29,5 +29,5 @@
 -->  
 
 <apex:page standardController="Contact" recordSetVar="metrics" extensions="C501_CS_ListView_Controller" action="{!createContactTrigger}">
-  Hello
+  <apex:include pageName="C501_ContactSubscription"/>
 </apex:page>

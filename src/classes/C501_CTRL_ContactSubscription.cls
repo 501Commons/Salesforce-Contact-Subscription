@@ -31,6 +31,7 @@
 global virtual with sharing class C501_CTRL_ContactSubscription {
 
     private List<String> listStrFields;
+    private List<String> listContactSubscriptionRequests;
     
     global boolean redirect { get; private set; }
     global ID idRedirect { get; private set; }
@@ -48,15 +49,23 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
     // constructor
     global C501_CTRL_ContactSubscription() {
+        new C501_CTRL_ContactSubscription(null);
+    }
+
+    global C501_CTRL_ContactSubscription(ApexPages.StandardController controller) {
 
         System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription Constructor');
 
-        redirect = false;
-        
-        // handle optional parameters (must use string, not ID, to handle null)
-        string id = ApexPages.currentPage().getParameters().get('id');
-        if (id != null && id != '') contactRecord.Id = id;
+        if (controller != null) {
+            this.contactRecord = (Contact)controller.getRecord();
+        }
+        else {
+            this.contactRecord = new Contact();
+        }
 
+        redirect = false;
+        listContactSubscriptionRequests = new List<String>();
+        
         // Get list of fields FROM fieldset
         listStrFields = new List<String>();
         for (Schema.FieldSetMember f : this.getFields()) {
@@ -114,7 +123,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     global String strSaveResults { get; set; }
       
     // The list of contact subscriptions.
-    global List<CampaignMember> listContactSubscriptions {
+    global List<Campaign> listContactSubscriptions {
         get {
             if (listContactSubscriptions == null) {
                 FillContactSubscriptions();
@@ -125,50 +134,72 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         
         set;
     }
-        
+
     // helper function that the client can override, to query for the appropriate fields in contacts.
     global virtual void FillContactSubscriptions() {
 
-        String strSoql = 'SELECT Campaign.Name, Campaign.Parent.Name FROM CampaignMember WHERE ContactId = :contactRecord.Id Order By Campaign.Parent.Name, Campaign.Name ASC';
+        List<String> subscribedCampaignIds = new List<String>();
+        if (!String.isBlank(contactRecord.Id)) {
+
+            List<CampaignMember> members = [SELECT CampaignId FROM CampaignMember WHERE ContactId = :contactRecord.Id];
+            if (!members.isEmpty()) {
+
+                for (CampaignMember memberRecord :members) {
+                    subscribedCampaignIds.add(memberRecord.CampaignId);
+                }
+            }
+        }
+
+        System.debug('*****C501_CTRL_ContactSubscrition::FillContactSubscriptions subscribedCampaignIds: ' + subscribedCampaignIds + ' listContactSubscriptionRequests: ' + listContactSubscriptionRequests);
+
+        String strSoql = 'SELECT C501_CS_Action__c, Name, Parent.Name FROM Campaign WHERE Id in :subscribedCampaignIds OR Id in :listContactSubscriptionRequests';
         listContactSubscriptions = Database.Query(strSoql);
     }
     
     global virtual PageReference AddSubscription() {
-        
-        if (listContactSubscriptions == null) {
-            listContactSubscriptions = new List<CampaignMember>();
-        }
+
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription');
 
         if (String.isBlank(contactRecord.Group__c)) {
             return null;
         }
 
-        Id groupId;
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.Group__c);
+
+        Campaign groupCampaign;
 
         List<Campaign> campaigns = [SELECT Id, Name, Parent.Name from Campaign];
         for (Campaign campaignRecord :campaigns) {
+
+            System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription Campaign - campaignRecord: ' + campaignRecord.Name);
+
             if (campaignRecord.Name == contactRecord.Group__c) {
-                groupId = campaignRecord.Id;
+                groupCampaign = campaignRecord;
                 break;
             }
         }
 
-        if (groupId == null) {
+        if (groupCampaign.Id == null) {
             return null;
         }
 
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Found: ' + contactRecord.Group__c);
+
         // Check if group already added
-        for (CampaignMember subscription :listContactSubscriptions) {
-            if (subscription.Campaign.Name.equals(contactRecord.Group__c)) {
-                System.debug('*****C501_CTRL_ContactSubscrition::FillContactSubscriptions - Group: ' + contactRecord.Group__c + ' already subscribed');
-                return null;
+        if (listContactSubscriptions != null) {
+            for (Campaign subscription :listContactSubscriptions) {
+                if (subscription.Name.equals(contactRecord.Group__c)) {
+                    System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.Group__c + ' already subscribed');
+                    return null;
+                }
             }
         }
 
-        // Add subscription
-        listContactSubscriptions.add( new CampaignMember(
-            CampaignId = groupId
-        ));
+        // Add subscription request
+        listContactSubscriptionRequests.add(groupCampaign.Id);
+
+        // Clear out list so will get rebuilt
+        listContactSubscriptions = null;
 
         return null;
     }
@@ -181,29 +212,48 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         strSaveResults = null;
         
         try {
+
+            if (String.isBlank(contactRecord.Id)) {
+                insert contactRecord;
+            }
+            else {
+                update contactRecord;
+            }
+
             System.debug('***** C501_CTRL_ContactSubscription::SaveContact listContactSubscriptions: ' + String.valueOf(listContactSubscriptions));
 
-            List<CampaignMember> insertContactSubscriptions = new List<CampaignMember>();
-            List<CampaignMember> removeContactSubscriptions = new List<CampaignMember>();
-            for (CampaignMember contactSubscription : listContactSubscriptions) {
+            List<String> insertContactSubscriptions = new List<String>();
+            List<String> removeContactSubscriptions = new List<String>();
+            for (Campaign contactSubscription : listContactSubscriptions) {
 
-                if (contactSubscription.C501_CS_Action__c == 'Remove' && !String.isBlank(contactSubscription.Id)) {
-                    removeContactSubscriptions.add(contactSubscription);
+                if (contactSubscription.C501_CS_Action__c == 'Remove') {
+                    removeContactSubscriptions.add(contactSubscription.Id);
                 }
                 else if (String.isBlank(contactSubscription.Id)) {
-                    insertContactSubscriptions.add(contactSubscription);
+                    insertContactSubscriptions.add(contactSubscription.Id);
                 }
             }
 
             if (!removeContactSubscriptions.isEmpty()) {
-                delete removeContactSubscriptions;
+                List<CampaignMember> removeMembers = [SELECT Id FROM CampaignMember where ContactId = :contactRecord.Id AND CampaignId in :removeContactSubscriptions];
+                if (!removeMembers.isEmpty()) {
+                    delete removeMembers;
+                }
             }
 
             if (!insertContactSubscriptions.isEmpty()) {
-                insert insertContactSubscriptions;
-            }
+                List<CampaignMember> insertMembers = new List<CampaignMember>();
+                for (String campaignId :insertContactSubscriptions) {
+                    insertMembers.add(new CampaignMember(
+                        CampaignId = campaignId,
+                        ContactId = contactRecord.Id
+                    ));
+                }
 
-            update contactRecord;
+                if (!insertMembers.isEmpty()) {
+                    insert insertMembers;
+                }
+            }
 
             return null;
 
