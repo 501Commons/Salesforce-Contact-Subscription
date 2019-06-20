@@ -89,18 +89,24 @@
 
             <apex:pageBlock title="Contact Fields">
 
-                    <apex:pageBlockSection title="Standard Fields">
-                            <apex:repeat value="{!fields}" var="f">
-                                    <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                        required="{!OR(f.required, f.dbrequired)}"/>
-                            </apex:repeat>
+                    <apex:pageBlockSection title="Standard">
+                        <apex:repeat value="{!fields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
                     </apex:pageBlockSection>
                 
                     <apex:pageBlockSection title="Subscription">
-                            <apex:inputField value="{!contactRecord.Group__c}"/>
-                            <apex:inputField value="{!contactRecord.Sub_Group__c}"/>
 
-                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
+                        <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
+                            <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
+                            <apex:selectOptions value="{!listGroups}" /> 
+                        </apex:selectList>
+                        <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
+                            <apex:selectOptions value="{!listSubGroups}" /> 
+                        </apex:selectList>
+
+                        <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
                     </apex:pageBlockSection>
             
             </apex:pageBlock>

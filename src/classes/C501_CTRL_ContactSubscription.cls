@@ -14,7 +14,7 @@
       its contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
  
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    THIS GroupFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
     "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
     LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
     FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
@@ -24,7 +24,7 @@
     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
     CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
     LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+    ANY WAY OUT OF THE USE OF THIS GroupFTWARE, EVEN IF ADVISED OF THE 
     POSSIBILITY OF SUCH DAMAGE.
 */
 
@@ -121,7 +121,29 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
     // status string for reporting the results of saving.
     global String strSaveResults { get; set; }
-      
+
+    global List<SelectOption> listGroups {
+        get {
+            if (listGroups == null )
+                listGroups = this.ListGroups(null);
+
+            return listGroups;
+        }
+
+        set;
+        }
+
+    global List<SelectOption> listSubGroups {
+        get {
+            if (listSubGroups == null )
+                listSubGroups = this.ListGroups(contactRecord.C501_CS_Group__c);
+
+            return listSubGroups;
+        }
+
+        set;
+    }
+
     // The list of contact subscriptions.
     global List<Campaign> listContactSubscriptions {
         get {
@@ -133,6 +155,32 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         }
         
         set;
+    }
+
+    global List<SelectOption> ListGroups(String groupFilter) {
+
+        Set<String> setGroupUnique = new Set<String>();
+        List<SelectOption> listGroup = new List<SelectOption>();
+        listGroup.add(new SelectOption('', ''));
+
+        System.debug('*****C501_CTRL_ContactSubscrition::ListGroups groupFilter: ' + groupFilter);
+
+        if (String.isBlank(groupFilter)) {
+            for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Status = 'Planned' OR Status = 'In Progress' ORDER BY Name ASC]) {
+                listGroup.add(new SelectOption(
+                    campaignRecord.Id,
+                    campaignRecord.Name));
+            }
+        }
+        else {
+            for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
+                listGroup.add(new SelectOption(
+                    campaignRecord.Id,
+                    campaignRecord.Name));
+            }
+        }
+
+        return listGroup;
     }
 
     // helper function that the client can override, to query for the appropriate fields in contacts.
@@ -156,15 +204,24 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         listContactSubscriptions = Database.Query(strSoql);
     }
     
+    // the user has changed the Group dropdown
+    global virtual PageReference ChangeGroup() {
+
+        listSubGroups = null;
+        strSaveResults = null;
+
+        return null;
+    }
+
     global virtual PageReference AddSubscription() {
 
         System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription');
 
-        if (String.isBlank(contactRecord.Group__c)) {
+        if (String.isBlank(contactRecord.C501_CS_Group__c)) {
             return null;
         }
 
-        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.Group__c);
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Id: ' + contactRecord.C501_CS_Group__c);
 
         Campaign groupCampaign;
 
@@ -173,7 +230,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
             System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription Campaign - campaignRecord: ' + campaignRecord.Name);
 
-            if (campaignRecord.Name == contactRecord.Group__c) {
+            if (campaignRecord.Id == contactRecord.C501_CS_Group__c) {
                 groupCampaign = campaignRecord;
                 break;
             }
@@ -183,13 +240,13 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
             return null;
         }
 
-        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Found: ' + contactRecord.Group__c);
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Found: ' + groupCampaign.Name);
 
         // Check if group already added
         if (listContactSubscriptions != null) {
             for (Campaign subscription :listContactSubscriptions) {
-                if (subscription.Name.equals(contactRecord.Group__c)) {
-                    System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.Group__c + ' already subscribed');
+                if (subscription.Name.equals(contactRecord.C501_CS_Group__c)) {
+                    System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.C501_CS_Group__c + ' already subscribed');
                     return null;
                 }
             }
