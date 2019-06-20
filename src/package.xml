@@ -20,7 +20,10 @@
         <name>ApexPage</name>
     </types>
     <types>
-        <members>Campaign.C501_CS_Action__c</members>
+        <members>Campaign.C501_CS_Remove__c</members>
+        <members>Campaign.C501_CS_Subscription__c</members>
+        <members>Contact.C501_CS_Group__c</members>
+        <members>Contact.C501_CS_Sub_Group__c</members>
         <name>CustomField</name>
     </types>
     <types>
@@ -45,7 +48,7 @@
         <name>CustomLabels</name>
     </types>
     <types>
-        <members>Contact.ContactSubscription</members>
+        <members>Contact.C501_CS_Information</members>
         <name>FieldSet</name>
     </types>
     <types>

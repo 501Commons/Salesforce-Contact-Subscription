@@ -99,11 +99,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     global Schema.FieldSet fieldSetActive {
         get {
 
-            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.ContactSubscription;
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Information;
             for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
 
                 // Check for custom fields set
-                if (fieldSetName.contains('ContactSubscription_custom')) {
+                if (fieldSetName.equals('Information')) {
                     fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
                     break;
                 }
@@ -125,7 +125,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     global List<SelectOption> listGroups {
         get {
             if (listGroups == null )
-                listGroups = this.ListGroups(null);
+                listGroups = this.ListGroups();
 
             return listGroups;
         }
@@ -136,7 +136,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     global List<SelectOption> listSubGroups {
         get {
             if (listSubGroups == null )
-                listSubGroups = this.ListGroups(contactRecord.C501_CS_Group__c);
+                listSubGroups = this.ListSubGroups(contactRecord.C501_CS_Group__c);
 
             return listSubGroups;
         }
@@ -157,27 +157,37 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         set;
     }
 
-    global List<SelectOption> ListGroups(String groupFilter) {
+    global List<SelectOption> ListGroups() {
 
         Set<String> setGroupUnique = new Set<String>();
         List<SelectOption> listGroup = new List<SelectOption>();
         listGroup.add(new SelectOption('', ''));
 
-        System.debug('*****C501_CTRL_ContactSubscrition::ListGroups groupFilter: ' + groupFilter);
+        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Status = 'Planned' OR Status = 'In Progress' ORDER BY Name ASC]) {
+            listGroup.add(new SelectOption(
+                campaignRecord.Id,
+                campaignRecord.Name));
+        }
+
+        return listGroup;
+    }
+
+    global List<SelectOption> ListSubGroups(String groupFilter) {
+
+        Set<String> setGroupUnique = new Set<String>();
+        List<SelectOption> listGroup = new List<SelectOption>();
+        listGroup.add(new SelectOption('', ''));
 
         if (String.isBlank(groupFilter)) {
-            for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Status = 'Planned' OR Status = 'In Progress' ORDER BY Name ASC]) {
-                listGroup.add(new SelectOption(
-                    campaignRecord.Id,
-                    campaignRecord.Name));
-            }
+            return null;
         }
-        else {
-            for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
-                listGroup.add(new SelectOption(
-                    campaignRecord.Id,
-                    campaignRecord.Name));
-            }
+
+        System.debug('*****C501_CTRL_ContactSubscrition::ListGroups groupFilter: ' + groupFilter);
+
+        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
+            listGroup.add(new SelectOption(
+                campaignRecord.Id,
+                campaignRecord.Name));
         }
 
         return listGroup;
@@ -209,6 +219,30 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         listSubGroups = null;
         strSaveResults = null;
+
+        return null;
+    }
+
+    // the user has changed the Group Action dropdown
+    global virtual PageReference ChangeGroupAction() {
+
+        for (Campaign contactSubscription : listContactSubscriptions) {
+
+            if (contactSubscription.C501_CS_Action__c == 'Remove') {
+        
+                System.debug('***** C501_CTRL_ContactSubscription::ChangeGroupAction Remove Request contactSubscription: ' + contactSubscription);
+
+                for (String campaignId :listContactSubscriptionRequests) {
+                    if (campaignId.equals(contactSubscription.Id)) {
+                        listContactSubscriptionRequests.remove(listContactSubscriptionRequests.indexOf(campaignId));
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Clear out list so will get rebuilt
+        listContactSubscriptions = null;
 
         return null;
     }

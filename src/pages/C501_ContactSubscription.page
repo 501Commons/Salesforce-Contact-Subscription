@@ -97,28 +97,33 @@
                     </apex:pageBlockSection>
                 
                     <apex:pageBlockSection title="Subscription">
-
-                        <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
-                            <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
-                            <apex:selectOptions value="{!listGroups}" /> 
-                        </apex:selectList>
-                        <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
-                            <apex:selectOptions value="{!listSubGroups}" /> 
-                        </apex:selectList>
-
-                        <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
+                        <apex:actionRegion >
+                            <apex:outputLabel value="Group" for="ddlGroups"/>
+                            <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
+                                <apex:selectOptions value="{!listGroups}" /> 
+                            </apex:selectList>
+                            <apex:outputLabel value="Sub Group" for="ddlSubGroups"/>
+                            <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
+                                <apex:selectOptions value="{!listSubGroups}" /> 
+                            </apex:selectList>
+                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
+                        </apex:actionRegion>
                     </apex:pageBlockSection>
-            
+                    
             </apex:pageBlock>
 
             <apex:dataTable value="{!listContactSubscriptions}" var="ContactSubscription" id="tblContactSubscriptions" 
                             styleClass="slds-table slds-table--compact slds-table--bordered"
                             headerClass="slds-text-heading--label slds-theme--shade" style="width:100%" >                 
-                            
+
                 <apex:column styleClass="myTD reference" >
                     <apex:facet name="header">Action</apex:facet>
-                    <apex:inputField value="{!ContactSubscription.C501_CS_Action__c}" styleClass="picklist" required="false" >
-                    </apex:inputField>
+                    <apex:actionRegion >
+                        <apex:inputField value="{!ContactSubscription.C501_CS_Action__c}" styleClass="picklist" required="false" >
+                            <apex:actionSupport immediate="false" event="onchange" rerender="tblContactSubscriptions" status="retrieveStatus" action="{!ChangeGroupAction}" />
+                        </apex:inputField>
+                    </apex:actionRegion>
                 </apex:column> 
 
                 <apex:column styleClass="myTD reference" >
