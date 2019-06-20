@@ -31,7 +31,7 @@
 global virtual with sharing class C501_CTRL_ContactSubscription {
 
     private List<String> listStrFields;
-    private List<String> listContactSubscriptionRequests;
+    private Set<String> listContactSubscriptionRequests;
     
     global boolean redirect { get; private set; }
     global ID idRedirect { get; private set; }
@@ -64,7 +64,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         }
 
         redirect = false;
-        listContactSubscriptionRequests = new List<String>();
+        listContactSubscriptionRequests = new Set<String>();
         
         // Get list of fields FROM fieldset
         listStrFields = new List<String>();
@@ -148,6 +148,9 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     global List<Campaign> listContactSubscriptions {
         get {
             if (listContactSubscriptions == null) {
+                System.debug('*****C501_CTRL_ContactSubscrition::listContactSubscriptions');
+
+                listContactSubscriptions = new List<Campaign>();
                 FillContactSubscriptions();
             }
 
@@ -210,8 +213,19 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         System.debug('*****C501_CTRL_ContactSubscrition::FillContactSubscriptions subscribedCampaignIds: ' + subscribedCampaignIds + ' listContactSubscriptionRequests: ' + listContactSubscriptionRequests);
 
-        String strSoql = 'SELECT C501_CS_Action__c, Name, Parent.Name FROM Campaign WHERE Id in :subscribedCampaignIds OR Id in :listContactSubscriptionRequests';
-        listContactSubscriptions = Database.Query(strSoql);
+        // Add Active Subscriptions
+        String strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE Id in :subscribedCampaignIds';
+        for (Campaign campaignRecord :Database.Query(strSoql)) {
+            campaignRecord.C501_CS_Subscription__c = 'Active';
+            listContactSubscriptions.add(campaignRecord);
+        }
+
+        // Add Requested Subscriptions
+        strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE (NOT Id in :subscribedCampaignIds) AND Id in :listContactSubscriptionRequests';
+        for (Campaign campaignRecord :Database.Query(strSoql)) {
+            campaignRecord.C501_CS_Subscription__c = 'Requested';
+            listContactSubscriptions.add(campaignRecord);
+        }
     }
     
     // the user has changed the Group dropdown
@@ -226,20 +240,18 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     // the user has changed the Group Action dropdown
     global virtual PageReference ChangeGroupAction() {
 
+        System.debug('*****C501_CTRL_ContactSubscrition::ChangeGroupAction');
+
         for (Campaign contactSubscription : listContactSubscriptions) {
 
-            if (contactSubscription.C501_CS_Action__c == 'Remove') {
+            if (contactSubscription.C501_CS_Remove__c && contactSubscription.C501_CS_Subscription__c == 'Requested') {
         
                 System.debug('***** C501_CTRL_ContactSubscription::ChangeGroupAction Remove Request contactSubscription: ' + contactSubscription);
-
-                for (String campaignId :listContactSubscriptionRequests) {
-                    if (campaignId.equals(contactSubscription.Id)) {
-                        listContactSubscriptionRequests.remove(listContactSubscriptionRequests.indexOf(campaignId));
-                        break;
-                    }
-                }
+                listContactSubscriptionRequests.remove(contactSubscription.Id);
             }
         }
+
+        System.debug('*****C501_CTRL_ContactSubscrition::ChangeGroupAction - reset listContactSubscriptions');
 
         // Clear out list so will get rebuilt
         listContactSubscriptions = null;
@@ -289,6 +301,8 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         // Add subscription request
         listContactSubscriptionRequests.add(groupCampaign.Id);
 
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - reset listContactSubscriptions');
+
         // Clear out list so will get rebuilt
         listContactSubscriptions = null;
 
@@ -317,7 +331,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
             List<String> removeContactSubscriptions = new List<String>();
             for (Campaign contactSubscription : listContactSubscriptions) {
 
-                if (contactSubscription.C501_CS_Action__c == 'Remove') {
+                if (contactSubscription.C501_CS_Remove__c) {
                     removeContactSubscriptions.add(contactSubscription.Id);
                 }
                 else if (String.isBlank(contactSubscription.Id)) {

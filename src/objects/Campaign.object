@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
     <fields>
-        <fullName>C501_CS_Action__c</fullName>
+        <fullName>C501_CS_Remove__c</fullName>
+        <defaultValue>false</defaultValue>
         <externalId>false</externalId>
-        <label>CS Action</label>
+        <label>Remove</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>C501_CS_Subscription__c</fullName>
+        <externalId>false</externalId>
+        <label>Subscription</label>
         <required>false</required>
         <type>Picklist</type>
         <valueSet>
@@ -11,9 +18,14 @@
             <valueSetDefinition>
                 <sorted>false</sorted>
                 <value>
-                    <fullName>Remove</fullName>
+                    <fullName>Active</fullName>
                     <default>false</default>
-                    <label>Remove</label>
+                    <label>Active</label>
+                </value>
+                <value>
+                    <fullName>Requested</fullName>
+                    <default>false</default>
+                    <label>Requested</label>
                 </value>
             </valueSetDefinition>
         </valueSet>

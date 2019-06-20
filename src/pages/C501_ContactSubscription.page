@@ -118,14 +118,20 @@
                             headerClass="slds-text-heading--label slds-theme--shade" style="width:100%" >                 
 
                 <apex:column styleClass="myTD reference" >
-                    <apex:facet name="header">Action</apex:facet>
+                    <apex:facet name="header">Remove</apex:facet>
                     <apex:actionRegion >
-                        <apex:inputField value="{!ContactSubscription.C501_CS_Action__c}" styleClass="picklist" required="false" >
+                        <apex:inputField value="{!ContactSubscription.C501_CS_Remove__c}" styleClass="checkbox" required="false" >
                             <apex:actionSupport immediate="false" event="onchange" rerender="tblContactSubscriptions" status="retrieveStatus" action="{!ChangeGroupAction}" />
                         </apex:inputField>
                     </apex:actionRegion>
                 </apex:column> 
 
+                <apex:column styleClass="myTD reference" >
+                    <apex:facet name="header">Status</apex:facet>
+                    <apex:outputField value="{!ContactSubscription.C501_CS_Subscription__c}" styleClass="text" >
+                    </apex:outputField>
+                </apex:column> 
+    
                 <apex:column styleClass="myTD reference" >
                     <apex:facet name="header">Subscription</apex:facet>
                     <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
