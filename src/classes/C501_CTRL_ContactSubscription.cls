@@ -238,23 +238,34 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // the user has changed the Group Action dropdown
-    global virtual PageReference ChangeGroupAction() {
+    global virtual PageReference RefreshSubscriptions() {
 
-        System.debug('*****C501_CTRL_ContactSubscrition::ChangeGroupAction');
-
-        for (Campaign contactSubscription : listContactSubscriptions) {
-
-            if (contactSubscription.C501_CS_Remove__c && contactSubscription.C501_CS_Subscription__c == 'Requested') {
-        
-                System.debug('***** C501_CTRL_ContactSubscription::ChangeGroupAction Remove Request contactSubscription: ' + contactSubscription);
-                listContactSubscriptionRequests.remove(contactSubscription.Id);
-            }
-        }
-
-        System.debug('*****C501_CTRL_ContactSubscrition::ChangeGroupAction - reset listContactSubscriptions');
+        System.debug('*****C501_CTRL_ContactSubscrition::RefreshSubscriptions');
 
         // Clear out list so will get rebuilt
         listContactSubscriptions = null;
+
+        return null;
+    }
+
+    // the user has changed the Group Action dropdown
+    global virtual PageReference OnChangeRemoveSubscription() {
+
+        for (Campaign contactSubscription : listContactSubscriptions) {
+
+            if (contactSubscription.C501_CS_Subscription__c == 'Requested') {
+        
+                if (contactSubscription.C501_CS_Remove__c) {
+
+                    System.debug('***** C501_CTRL_ContactSubscription::OnChangeRemoveSubscription Remove Request contactSubscription: ' + contactSubscription);
+                    listContactSubscriptionRequests.remove(contactSubscription.Id);
+                }
+                else {
+                    System.debug('***** C501_CTRL_ContactSubscription::OnChangeRemoveSubscription Subscribe Request contactSubscription: ' + contactSubscription);
+                    listContactSubscriptionRequests.add(contactSubscription.Id);
+                }
+            }
+        }
 
         return null;
     }

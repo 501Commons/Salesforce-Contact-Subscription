@@ -33,6 +33,7 @@
         <members>CS_PageMessagesWarning</members>
         <members>CS_labelButtonCancel</members>
         <members>CS_labelButtonClose</members>
+        <members>CS_labelButtonRefresh</members>
         <members>CS_labelButtonSave</members>
         <members>CS_labelButtonSaveAndClose</members>
         <members>CS_labelButtonSubscribe</members>

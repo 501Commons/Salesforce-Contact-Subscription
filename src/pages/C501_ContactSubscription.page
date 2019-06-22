@@ -108,6 +108,7 @@
                                 <apex:selectOptions value="{!listSubGroups}" /> 
                             </apex:selectList>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
+                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!RefreshSubscriptions}" value="{!$Label.CS_labelButtonRefresh}" id="btnRefresh" immediate="false" reRender="tblContactSubscriptions"/>
                         </apex:actionRegion>
                     </apex:pageBlockSection>
                     
@@ -121,7 +122,7 @@
                     <apex:facet name="header">Remove</apex:facet>
                     <apex:actionRegion >
                         <apex:inputField value="{!ContactSubscription.C501_CS_Remove__c}" styleClass="checkbox" required="false" >
-                            <apex:actionSupport immediate="false" event="onchange" rerender="tblContactSubscriptions" status="retrieveStatus" action="{!ChangeGroupAction}" />
+                            <apex:actionSupport immediate="false" event="onchange" rerender="tblContactSubscriptions" status="retrieveStatus" action="{!OnChangeRemoveSubscription}" />
                         </apex:inputField>
                     </apex:actionRegion>
                 </apex:column> 
