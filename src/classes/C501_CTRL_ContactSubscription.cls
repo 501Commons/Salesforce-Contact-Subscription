@@ -281,27 +281,39 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Id: ' + contactRecord.C501_CS_Group__c);
 
         Campaign groupCampaign;
+        Campaign subGroupCampaign;
 
         List<Campaign> campaigns = [SELECT Id, Name, Parent.Name from Campaign];
         for (Campaign campaignRecord :campaigns) {
 
             System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription Campaign - campaignRecord: ' + campaignRecord.Name);
 
+            // Check for Group Match
             if (campaignRecord.Id == contactRecord.C501_CS_Group__c) {
                 groupCampaign = campaignRecord;
-                break;
+            }
+
+            // Check for Sub Group Match
+            if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c)) {
+                if (campaignRecord.Id == contactRecord.C501_CS_Sub_Group__c) {
+                    subGroupCampaign = campaignRecord;
+                }
             }
         }
 
-        if (groupCampaign.Id == null) {
+        if (groupCampaign == null || groupCampaign.Id == null) {
             return null;
         }
-
-        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Found: ' + groupCampaign.Name);
 
         // Check if group already added
         if (listContactSubscriptions != null) {
             for (Campaign subscription :listContactSubscriptions) {
+
+                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c) && subscription.Name.equals(contactRecord.C501_CS_Sub_Group__c)) {
+                    System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Sub Group: ' + contactRecord.C501_CS_Sub_Group__c + ' already subscribed');
+                    return null;
+                }
+
                 if (subscription.Name.equals(contactRecord.C501_CS_Group__c)) {
                     System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.C501_CS_Group__c + ' already subscribed');
                     return null;
@@ -310,9 +322,12 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         }
 
         // Add subscription request
-        listContactSubscriptionRequests.add(groupCampaign.Id);
-
-        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - reset listContactSubscriptions');
+        if (subGroupCampaign == null || subGroupCampaign.Id == null) {
+            listContactSubscriptionRequests.add(groupCampaign.Id);
+        }
+        else {
+            listContactSubscriptionRequests.add(subGroupCampaign.Id);
+        }
 
         // Clear out list so will get rebuilt
         listContactSubscriptions = null;
