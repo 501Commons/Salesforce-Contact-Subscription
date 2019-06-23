@@ -56,13 +56,6 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription Constructor');
 
-        if (controller != null) {
-            this.contactRecord = (Contact)controller.getRecord();
-        }
-        else {
-            this.contactRecord = new Contact();
-        }
-
         redirect = false;
         listContactSubscriptionRequests = new Set<String>();
         
@@ -73,29 +66,40 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         }
 
         // Required fields
-        if (!ListPartialContains(listStrFields, 'Id')) {
+        if (!listStrFields.contains('Id')) {
             listStrFields.add('Id');
         }
-        if (!ListPartialContains(listStrFields, 'LastName')) {
+        if (!listStrFields.contains('LastName')) {
             listStrFields.add('LastName');
+        }
+        if (!listStrFields.contains('C501_CS_Group__c')) {
+            listStrFields.add('C501_CS_Group__c');
+        }
+        if (!listStrFields.contains('C501_CS_Sub_Group__c')) {
+            listStrFields.add('C501_CS_Sub_Group__c');
+        }
+
+        if (controller != null) {
+            this.contactRecord = (Contact)controller.getRecord();
+            System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription getRecord: ' + this.contactRecord);
+            System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription getRecordId: ' + this.contactRecord.Id);
+
+            String strSoql = 'SELECT ' + String.join(listStrFields, ',');
+            strSoql += ' FROM Contact WHERE Id = \'' + this.contactRecord.Id + '\'';
+
+            System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription soql: ' + strSoql);
+
+            for (Contact contactRecord :Database.query(strSoql)) {
+                this.contactRecord = contactRecord;
+                System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription query record: ' + this.contactRecord);
+                break;
+            }
+        }
+        else {
+            this.contactRecord = new Contact();
         }
     }   
     
-    private Boolean ListPartialContains(List<String> listStrFields, String fieldValue) {
-
-        if (listStrFields == null) {
-            return false;
-        }
-
-        for (String listValue :listStrFields) {
-            if (listValue.contains(fieldValue)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     global Schema.FieldSet fieldSetActive {
         get {
 
@@ -242,6 +246,9 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         System.debug('*****C501_CTRL_ContactSubscrition::RefreshSubscriptions');
 
+        // Future Change - on refresh Remove value on any active subscriptions will be reset back to false.
+        //      Fix would be here to update related campaign member by adding/updating C501_CS_Remove__c field.
+
         // Clear out list so will get rebuilt
         listContactSubscriptions = null;
 
@@ -278,7 +285,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
             return null;
         }
 
-        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group Id: ' + contactRecord.C501_CS_Group__c);
+        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - listContactSubscriptions: ' + listContactSubscriptions);
 
         Campaign groupCampaign;
         Campaign subGroupCampaign;
@@ -286,7 +293,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         List<Campaign> campaigns = [SELECT Id, Name, Parent.Name from Campaign];
         for (Campaign campaignRecord :campaigns) {
 
-            System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription Campaign - campaignRecord: ' + campaignRecord.Name);
+            System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription Campaign - campaignRecordId: ' + campaignRecord.Id + ' contactRecord.C501_CS_Group__c: ' + contactRecord.C501_CS_Group__c + ' contactRecord.C501_CS_Sub_Group__c: ' + contactRecord.C501_CS_Sub_Group__c);
 
             // Check for Group Match
             if (campaignRecord.Id == contactRecord.C501_CS_Group__c) {
@@ -309,12 +316,12 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         if (listContactSubscriptions != null) {
             for (Campaign subscription :listContactSubscriptions) {
 
-                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c) && subscription.Name.equals(contactRecord.C501_CS_Sub_Group__c)) {
+                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c) && subscription.Id.equals(contactRecord.C501_CS_Sub_Group__c)) {
                     System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Sub Group: ' + contactRecord.C501_CS_Sub_Group__c + ' already subscribed');
                     return null;
                 }
 
-                if (subscription.Name.equals(contactRecord.C501_CS_Group__c)) {
+                if (subscription.Id.equals(contactRecord.C501_CS_Group__c)) {
                     System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.C501_CS_Group__c + ' already subscribed');
                     return null;
                 }
@@ -323,9 +330,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         // Add subscription request
         if (subGroupCampaign == null || subGroupCampaign.Id == null) {
+            System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Add Group: ' + groupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
             listContactSubscriptionRequests.add(groupCampaign.Id);
         }
         else {
+            System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Add Sub Group: ' + subGroupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
             listContactSubscriptionRequests.add(subGroupCampaign.Id);
         }
 
@@ -360,7 +369,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
                 if (contactSubscription.C501_CS_Remove__c) {
                     removeContactSubscriptions.add(contactSubscription.Id);
                 }
-                else if (String.isBlank(contactSubscription.Id)) {
+                else if (contactSubscription.C501_CS_Subscription__c == 'Requested') {
                     insertContactSubscriptions.add(contactSubscription.Id);
                 }
             }
@@ -385,6 +394,8 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
                     insert insertMembers;
                 }
             }
+
+            listContactSubscriptions = null;
 
             return null;
 
