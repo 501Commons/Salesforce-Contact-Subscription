@@ -49,7 +49,11 @@
         <name>CustomLabels</name>
     </types>
     <types>
-        <members>Contact.C501_CS_Information</members>
+        <members>Contact.C501_CS_Address_Information</members>
+        <members>Contact.C501_CS_Assistant_Information</members>
+        <members>Contact.C501_CS_Description_Information</members>
+        <members>Contact.C501_CS_Standard_Information</members>
+        <members>Contact.C501_CS_Phone_Contact_Information</members>
         <name>FieldSet</name>
     </types>
     <types>

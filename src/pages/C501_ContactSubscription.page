@@ -90,12 +90,40 @@
             <apex:pageBlock title="Contact Fields">
 
                     <apex:pageBlockSection title="Standard">
-                        <apex:repeat value="{!fields}" var="f">
+                        <apex:repeat value="{!StandardFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
-                
+
+                    <apex:pageBlockSection title="Phone Contact">
+                        <apex:repeat value="{!PhoneContactFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Assistant">
+                        <apex:repeat value="{!AssistantFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Address">
+                        <apex:repeat value="{!AddressFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Description">
+                        <apex:repeat value="{!DescriptionFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
                     <apex:pageBlockSection title="Subscription">
                         <apex:actionRegion >
                             <apex:outputLabel value="Group" for="ddlGroups"/>
@@ -134,7 +162,7 @@
                 </apex:column> 
     
                 <apex:column styleClass="myTD reference" >
-                    <apex:facet name="header">Subscription</apex:facet>
+                    <apex:facet name="header">Subscriptions</apex:facet>
                     <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
                     </apex:outputField>
                 </apex:column> 

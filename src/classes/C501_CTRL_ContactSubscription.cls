@@ -61,7 +61,19 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         
         // Get list of fields FROM fieldset
         listStrFields = new List<String>();
-        for (Schema.FieldSetMember f : this.getFields()) {
+        for (Schema.FieldSetMember f : this.getStandardFields()) {
+            listStrFields.add(f.getFieldPath());
+        }
+        for (Schema.FieldSetMember f : this.getPhonecontactFields()) {
+            listStrFields.add(f.getFieldPath());
+        }
+        for (Schema.FieldSetMember f : this.getAssistantFields()) {
+            listStrFields.add(f.getFieldPath());
+        }
+        for (Schema.FieldSetMember f : this.getAddressFields()) {
+            listStrFields.add(f.getFieldPath());
+        }
+        for (Schema.FieldSetMember f : this.getDescriptionFields()) {
             listStrFields.add(f.getFieldPath());
         }
 
@@ -79,8 +91,9 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
             listStrFields.add('C501_CS_Sub_Group__c');
         }
 
-        if (controller != null) {
-            this.contactRecord = (Contact)controller.getRecord();
+        this.contactRecord = (Contact)controller.getRecord();
+
+        if (controller != null && this.contactRecord.Id != null) {
             System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription getRecord: ' + this.contactRecord);
             System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription getRecordId: ' + this.contactRecord.Id);
 
@@ -100,14 +113,19 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         }
     }   
     
-    global Schema.FieldSet fieldSetActive {
+    // getter - reference in Visualforce as StandardFields
+    global List<Schema.FieldSetMember> getStandardFields() {
+        return fieldSetStandardActive.getFields();
+    }
+
+    global Schema.FieldSet fieldSetStandardActive {
         get {
 
-            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Information;
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Standard_Information;
             for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
 
                 // Check for custom fields set
-                if (fieldSetName.equals('Information')) {
+                if (fieldSetName.equals('Standard Information')) {
                     fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
                     break;
                 }
@@ -118,9 +136,96 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         set;
     }
 
-    // getter - reference in Visualforce as fields
-    global List<Schema.FieldSetMember> getFields() {
-        return fieldSetActive.getFields();
+    // getter - reference in Visualforce as PhoneContactFields
+    global List<Schema.FieldSetMember> getPhoneContactFields() {
+        return fieldSetPhoneContactActive.getFields();
+    }
+
+    global Schema.FieldSet fieldSetPhoneContactActive {
+        get {
+
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Phone_Contact_Information;
+            for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
+
+                // Check for custom fields set
+                if (fieldSetName.equals('Phone Contact Information')) {
+                    fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
+                    break;
+                }
+            }
+
+            return fieldSetCheck;
+        }
+        set;
+    }
+
+    // getter - reference in Visualforce as AssistantFields
+    global List<Schema.FieldSetMember> getAssistantFields() {
+        return fieldSetAssistantActive.getFields();
+    }
+
+    global Schema.FieldSet fieldSetAssistantActive {
+        get {
+
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Assistant_Information;
+            for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
+
+                // Check for custom fields set
+                if (fieldSetName.equals('Assistant Information')) {
+                    fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
+                    break;
+                }
+            }
+
+            return fieldSetCheck;
+        }
+        set;
+    }
+
+    // getter - reference in Visualforce as AddressFields
+    global List<Schema.FieldSetMember> getAddressFields() {
+        return fieldSetAddressActive.getFields();
+    }
+
+    global Schema.FieldSet fieldSetAddressActive {
+        get {
+
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Address_Information;
+            for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
+
+                // Check for custom fields set
+                if (fieldSetName.equals('Address Information')) {
+                    fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
+                    break;
+                }
+            }
+
+            return fieldSetCheck;
+        }
+        set;
+    }
+
+    // getter - reference in Visualforce as DescriptionFields
+    global List<Schema.FieldSetMember> getDescriptionFields() {
+        return fieldSetDescriptionActive.getFields();
+    }
+
+    global Schema.FieldSet fieldSetDescriptionActive {
+        get {
+
+            Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Description_Information;
+            for (String fieldSetName :Schema.SObjectType.Contact.fieldSets.getMap().keySet()) {
+
+                // Check for custom fields set
+                if (fieldSetName.equals('Description Information')) {
+                    fieldSetCheck = Schema.SObjectType.Contact.fieldSets.getMap().get(fieldSetName);
+                    break;
+                }
+            }
+
+            return fieldSetCheck;
+        }
+        set;
     }
 
     // status string for reporting the results of saving.
@@ -316,12 +421,12 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         if (listContactSubscriptions != null) {
             for (Campaign subscription :listContactSubscriptions) {
 
-                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c) && subscription.Id.equals(contactRecord.C501_CS_Sub_Group__c)) {
-                    System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Sub Group: ' + contactRecord.C501_CS_Sub_Group__c + ' already subscribed');
-                    return null;
-                }
-
-                if (subscription.Id.equals(contactRecord.C501_CS_Group__c)) {
+                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c)) {
+                    if (subscription.Id.equals(contactRecord.C501_CS_Sub_Group__c)) {
+                        System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Sub Group: ' + contactRecord.C501_CS_Sub_Group__c + ' already subscribed');
+                        return null;
+                    }
+                } else if (subscription.Id.equals(contactRecord.C501_CS_Group__c)) {
                     System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription - Group: ' + contactRecord.C501_CS_Group__c + ' already subscribed');
                     return null;
                 }
@@ -395,6 +500,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
                 }
             }
 
+            listContactSubscriptionRequests.clear();
             listContactSubscriptions = null;
 
             return null;

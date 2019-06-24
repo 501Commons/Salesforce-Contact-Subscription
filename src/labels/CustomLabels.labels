@@ -49,6 +49,14 @@
         <value>Close</value>
     </labels>
     <labels>
+        <fullName>CS_labelButtonRefresh</fullName>
+        <categories>ContactSubscription</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>The label for the Refresh button used on several pages.</shortDescription>
+        <value>Refresh</value>
+    </labels>
+    <labels>
         <fullName>CS_labelButtonSave</fullName>
         <categories>ContactSubscription</categories>
         <language>en_US</language>
@@ -71,14 +79,6 @@
         <protected>false</protected>
         <shortDescription>The label for the Subscribe button used on several pages.</shortDescription>
         <value>Subscribe</value>
-    </labels>
-    <labels>
-        <fullName>CS_labelButtonRefresh</fullName>
-        <categories>ContactSubscription</categories>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>The label for the Refresh button used on several pages.</shortDescription>
-        <value>Refresh</value>
     </labels>
     <labels>
         <fullName>CS_labelContactSubscriptionErrorOnSave</fullName>
