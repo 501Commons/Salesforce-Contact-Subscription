@@ -20,8 +20,13 @@
         <name>ApexPage</name>
     </types>
     <types>
+        <members>C501_CS_ContactTrigger</members>
+        <name>ApexTrigger</name>
+    </types>
+    <types>
         <members>Campaign.C501_CS_Remove__c</members>
         <members>Campaign.C501_CS_Subscription__c</members>
+        <members>Contact.C501_CS_Created_By_Contact_Subscription__c</members>
         <members>Contact.C501_CS_Group__c</members>
         <members>Contact.C501_CS_Sub_Group__c</members>
         <name>CustomField</name>
@@ -52,8 +57,8 @@
         <members>Contact.C501_CS_Address_Information</members>
         <members>Contact.C501_CS_Assistant_Information</members>
         <members>Contact.C501_CS_Description_Information</members>
-        <members>Contact.C501_CS_Standard_Information</members>
         <members>Contact.C501_CS_Phone_Contact_Information</members>
+        <members>Contact.C501_CS_Standard_Information</members>
         <name>FieldSet</name>
     </types>
     <types>

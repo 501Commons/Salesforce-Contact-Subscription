@@ -340,10 +340,9 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     // the user has changed the Group dropdown
     global virtual PageReference ChangeGroup() {
 
+        contactRecord.C501_CS_Sub_Group__c = '';
         listSubGroups = null;
         strSaveResults = null;
-
-        contactRecord.C501_CS_Sub_Group__c = '';
 
         return null;
     }
@@ -460,25 +459,37 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         
         try {
 
-            if (String.isBlank(contactRecord.Id)) {
-                insert contactRecord;
-            }
-            else {
-                update contactRecord;
-            }
-
             System.debug('***** C501_CTRL_ContactSubscription::SaveContact listContactSubscriptions: ' + String.valueOf(listContactSubscriptions));
 
             List<String> insertContactSubscriptions = new List<String>();
             List<String> removeContactSubscriptions = new List<String>();
+            Integer numberOfSubscriptions = 0;
             for (Campaign contactSubscription : listContactSubscriptions) {
 
                 if (contactSubscription.C501_CS_Remove__c) {
                     removeContactSubscriptions.add(contactSubscription.Id);
                 }
                 else if (contactSubscription.C501_CS_Subscription__c == 'Requested') {
+                    numberOfSubscriptions++;
                     insertContactSubscriptions.add(contactSubscription.Id);
                 }
+                else if (contactSubscription.C501_CS_Subscription__c == 'Active') {
+                    numberOfSubscriptions++;
+                }
+            }
+
+            if (numberOfSubscriptions <= 0) {
+                ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.ERROR, 'Contact must has at least 1 subscription'));
+                return null;
+            }
+
+            contactRecord.C501_CS_Created_By_Contact_Subscription__c = true;
+            
+            if (String.isBlank(contactRecord.Id)) {
+                insert contactRecord;
+            }
+            else {
+                update contactRecord;
             }
 
             if (!removeContactSubscriptions.isEmpty()) {

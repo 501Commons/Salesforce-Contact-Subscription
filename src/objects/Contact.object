@@ -86,6 +86,41 @@
         <label>Description Information</label>
     </fieldSets>
     <fieldSets>
+        <fullName>C501_CS_Phone_Contact_Information</fullName>
+        <description>Phone contact information</description>
+        <displayedFields>
+            <field>Phone</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>Email</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>MobilePhone</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>Alternate_Email__c</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>Fax</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>Personal_Email__c</field>
+            <isFieldManaged>false</isFieldManaged>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <label>Phone Contact Information</label>
+    </fieldSets>
+    <fieldSets>
         <fullName>C501_CS_Standard_Information</fullName>
         <description>Contact Subscription Information Section</description>
         <displayedFields>
@@ -130,41 +165,16 @@
         </displayedFields>
         <label>Standard Information</label>
     </fieldSets>
-    <fieldSets>
-        <fullName>C501_CS_Phone_Contact_Information</fullName>
-        <description>Phone contact information</description>
-        <displayedFields>
-            <field>Phone</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>Email</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>MobilePhone</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>Alternate_Email__c</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>Fax</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <displayedFields>
-            <field>Personal_Email__c</field>
-            <isFieldManaged>false</isFieldManaged>
-            <isRequired>false</isRequired>
-        </displayedFields>
-        <label>Phone Contact Information</label>
-    </fieldSets>
+    <fields>
+        <fullName>C501_CS_Created_By_Contact_Subscription__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>Flag monitoring whether the contact was created by the Contact Subscription process</description>
+        <externalId>false</externalId>
+        <label>Created By Contact Subscription</label>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
     <fields>
         <fullName>C501_CS_Group__c</fullName>
         <externalId>false</externalId>
