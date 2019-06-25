@@ -162,7 +162,7 @@
                 </apex:column> 
     
                 <apex:column styleClass="myTD reference" >
-                    <apex:facet name="header">Subscriptions</apex:facet>
+                    <apex:facet name="header">Subscription</apex:facet>
                     <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
                     </apex:outputField>
                 </apex:column> 
