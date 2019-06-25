@@ -62,6 +62,10 @@
         <name>FieldSet</name>
     </types>
     <types>
+        <members>Contact-C501 CS Contact Subscription</members>
+        <name>Layout</name>
+    </types>
+    <types>
         <members>Bootstrap</members>
         <members>Bootstrap4Force</members>
         <members>FullCalendar</members>
