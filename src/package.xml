@@ -78,5 +78,10 @@
         <members>wtooltip</members>
         <name>StaticResource</name>
     </types>
+    <types>
+        <members>Contact.C501_CS_Create</members>
+        <members>Contact.C501_CS_Update</members>
+        <name>WebLink</name>
+    </types>
     <version>45.0</version>
 </Package>

@@ -21,4 +21,3 @@ test_results*
 /force-app
 /src.orig
 /debug.log
-.sfdx/typings/lwc/staticresources.d.ts

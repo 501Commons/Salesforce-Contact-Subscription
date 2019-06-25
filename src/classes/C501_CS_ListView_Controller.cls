@@ -35,9 +35,7 @@ public with sharing class C501_CS_ListView_Controller {
 
     public PageReference createContactTrigger() {
 
-        //Pagereference createContact = new Pagereference('/apex/C501_CS_ContactSubscription');
-        //return createContact;
-
-        return null;
+        Pagereference createContact = new Pagereference('/apex/C501_ContactSubscription');
+        return createContact;
     }
 }
