@@ -296,7 +296,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
 
         System.debug('*****C501_CTRL_ContactSubscrition::ListGroups groupFilter: ' + groupFilter);
 
-        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
+        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE RecordType.Name = 'Mailing List/Group' AND Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
             listGroup.add(new SelectOption(
                 campaignRecord.Id,
                 campaignRecord.Name));

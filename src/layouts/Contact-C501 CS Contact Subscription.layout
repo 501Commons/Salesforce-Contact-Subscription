@@ -148,13 +148,6 @@
                 <behavior>Edit</behavior>
                 <field>Description</field>
             </layoutItems>
-            <layoutItems>
-                <height>200</height>
-                <page>testInContact</page>
-                <showLabel>false</showLabel>
-                <showScrollbars>false</showScrollbars>
-                <width>100%</width>
-            </layoutItems>
         </layoutColumns>
         <style>OneColumn</style>
     </layoutSections>

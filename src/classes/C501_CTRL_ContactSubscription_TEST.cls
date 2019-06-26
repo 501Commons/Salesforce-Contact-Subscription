@@ -39,88 +39,94 @@
 //
 
 @isTest
-public class C501_CTRL_ContactSubscription_TEST {
-    
+class C501_CTRL_ContactSubscription_TEST {
+
     //==================== TEST METHOD(s) ======================================
 
     @isTest(SeeAllData='true')
-    public static void NewContactTest() {
+    static void NewContactTest() {
 
-        Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
-        System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
+      C501_CS_SharedCode.TestSetup();
 
-        Test.StartTest();
+      Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
+      System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
 
-        Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
-        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
+      Test.StartTest();
 
-        System.Assert(ctrl.listContactSubscriptions.size() > 0);
+      Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
+      C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
 
-        // test the save!
-        ctrl.SaveContact();
+      //System.Assert(ctrl.listContactSubscriptions.size() > 0);
 
-        System.debug('***** C501_CTRL_ContactSubscription_TEST::NewContactTest' + ctrl.strSaveResults);
-       //System.Assert(ctrl.strSaveResults.startsWith('Error'));
+      // test the save!
+      ctrl.SaveContact();
 
-        ctrl.SaveContact();      
-        ctrl.SaveAndCloseContact();   
+      System.debug('***** C501_CTRL_ContactSubscription_TEST::NewContactTest' + ctrl.strSaveResults);
+      //System.Assert(ctrl.strSaveResults.startsWith('Error'));
 
-        Test.StopTest();
+      ctrl.SaveContact();      
+      ctrl.SaveAndCloseContact();   
+
+      Test.StopTest();
     }
 
     @isTest(SeeAllData='true')
-    public static void EditContactTest() {
+    static void EditContactTest() {
 
-        Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
-        System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
+      C501_CS_SharedCode.TestSetup();
 
-        Test.StartTest();
+      Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
+      System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
 
-        Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
-        C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
+      Test.StartTest();
 
-        System.Assert(ctrl.listContactSubscriptions.size() > 0);
+      Apexpages.StandardController contactController = new Apexpages.StandardController(objContact);
+      C501_CTRL_ContactSubscription ctrl = new C501_CTRL_ContactSubscription(contactController);
 
-        // test the save!
-        ctrl.SaveContact();
+      //System.Assert(ctrl.listContactSubscriptions.size() > 0);
 
-        System.debug('***** C501_CTRL_ContactSubscription_TEST::EditContactTest' + ctrl.strSaveResults);
-       //System.Assert(ctrl.strSaveResults.startsWith('Error'));
+      // test the save!
+      ctrl.SaveContact();
 
-        ctrl.SaveContact();      
-        ctrl.SaveAndCloseContact();   
+      System.debug('***** C501_CTRL_ContactSubscription_TEST::EditContactTest' + ctrl.strSaveResults);
+      //System.Assert(ctrl.strSaveResults.startsWith('Error'));
 
-        Test.StopTest();
+      ctrl.SaveContact();      
+      ctrl.SaveAndCloseContact();   
+
+      Test.StopTest();
     }
 
     @isTest(SeeAllData='true')
-    public static void testPageMessagesController() {
+    static void testPageMessagesController() {
 
-        Test.StartTest();
+      C501_CS_SharedCode.TestSetup();
 
-        ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.WARNING,'warning'));
-        ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.INFO,'info'));
-        ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.FATAL,'fatal'));
-        ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.ERROR,'error'));
-        ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.CONFIRM,'confirm'));
+      Test.StartTest();
 
-        C501_CS_UTIL_PageMessages_CTRL controller = new C501_CS_UTIL_PageMessages_CTRL();
-        List<C501_CS_UTIL_PageMessages_CTRL.Message> messages = controller.getPageMessages();
+      ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.WARNING,'warning'));
+      ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.INFO,'info'));
+      ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.FATAL,'fatal'));
+      ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.ERROR,'error'));
+      ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.CONFIRM,'confirm'));
 
-        System.assertEquals(5, messages.size(), 'There should be 5 messages on the page.');
+      C501_CS_UTIL_PageMessages_CTRL controller = new C501_CS_UTIL_PageMessages_CTRL();
+      List<C501_CS_UTIL_PageMessages_CTRL.Message> messages = controller.getPageMessages();
 
-        System.assertEquals(Label.CS_PageMessagesWarning, messages[0].getSeverityLabel(), 'The label should be WARNING.');
-        System.assertEquals('', messages[1].getSeverityLabel(), 'The label should be INFO.');
-        System.assertEquals(Label.CS_PageMessagesFatal, messages[2].getSeverityLabel(), 'The label should be FATAL.');
-        System.assertEquals(Label.CS_PageMessagesError, messages[3].getSeverityLabel(), 'The label should be ERROR.');
-        System.assertEquals(Label.CS_PageMessagesConfirm, messages[4].getSeverityLabel(), 'The label should be CONFIRM.');
+      System.assertEquals(5, messages.size(), 'There should be 5 messages on the page.');
 
-        System.assertEquals('warning', messages[0].getSeverityTheme(), 'The theme should be warning.');
-        System.assertEquals('info', messages[1].getSeverityTheme(), 'The theme should be info.');
-        System.assertEquals('error', messages[2].getSeverityTheme(), 'The theme should be fatal.');
-        System.assertEquals('error', messages[3].getSeverityTheme(), 'The theme should be error.');
-        System.assertEquals('success', messages[4].getSeverityTheme(), 'The theme should be confirm.');
+      System.assertEquals(Label.CS_PageMessagesWarning, messages[0].getSeverityLabel(), 'The label should be WARNING.');
+      System.assertEquals('', messages[1].getSeverityLabel(), 'The label should be INFO.');
+      System.assertEquals(Label.CS_PageMessagesFatal, messages[2].getSeverityLabel(), 'The label should be FATAL.');
+      System.assertEquals(Label.CS_PageMessagesError, messages[3].getSeverityLabel(), 'The label should be ERROR.');
+      System.assertEquals(Label.CS_PageMessagesConfirm, messages[4].getSeverityLabel(), 'The label should be CONFIRM.');
 
-        Test.StopTest();
+      System.assertEquals('warning', messages[0].getSeverityTheme(), 'The theme should be warning.');
+      System.assertEquals('info', messages[1].getSeverityTheme(), 'The theme should be info.');
+      System.assertEquals('error', messages[2].getSeverityTheme(), 'The theme should be fatal.');
+      System.assertEquals('error', messages[3].getSeverityTheme(), 'The theme should be error.');
+      System.assertEquals('success', messages[4].getSeverityTheme(), 'The theme should be confirm.');
+
+      Test.StopTest();
     }
 }
