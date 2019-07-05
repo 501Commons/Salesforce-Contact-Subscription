@@ -275,7 +275,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         List<SelectOption> listGroup = new List<SelectOption>();
         listGroup.add(new SelectOption('', ''));
 
-        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE Parent.Id = null AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
+        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE RecordType.Name = 'Mailing List/Group' AND Parent.Id = null AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
             listGroup.add(new SelectOption(
                 campaignRecord.Id,
                 campaignRecord.Name));

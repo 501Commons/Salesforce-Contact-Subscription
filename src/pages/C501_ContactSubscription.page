@@ -193,6 +193,25 @@
                 fixSearchIMG();
             </script>
             &nbsp;&nbsp;&nbsp;&nbsp;
+
+            <!-- PAGE FOOTER -->
+            <div class="slds-page-header" role="banner">
+                <div class="slds-grid">
+                    <div class="slds-col--padded">
+                        <h1 class="slds-page-header__title slds-m-right--small slds-truncate slds-align-middle">{!$Label.CS_labelContactSubscriptionTitle}</h1>
+                    </div>        
+
+                    <div class="slds-col--padded slds-no-flex slds-align-middle">
+                        <div class="slds-button-group" role="group">
+                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!Cancel}" value="{!IF(ISNULL(strSaveResults), $Label.CS_labelButtonCancel, $Label.CS_labelButtonClose)}" immediate="true" reRender="vfform"/> 
+                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSaveFooter" immediate="false" reRender="vfform,tblContactSubscriptions"/>
+                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!SaveAndCloseContact}" value="{!$Label.CS_labelButtonSaveAndClose}" id="btnSaveCloseFooter" immediate="false" reRender="vfform"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /PAGE FOOTER -->
+
         </div> <!-- slds -->    
     </apex:form>
 </apex:page>
