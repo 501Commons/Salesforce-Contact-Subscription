@@ -30,6 +30,129 @@
 
 global with sharing class C501_CS_SharedCode { 
 
+   global static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isUpdate) {
+        
+        List<Id> contactIds = new List<Id>();
+        for (Contact contact :contactsChanged) {
+            contactIds.add(contact.Id);
+        }
+
+        List<Campaign> campaigns = [
+            SELECT Id, Name 
+            FROM Campaign
+            WHERE RecordType.Name like 'Mailing List/Group' AND (Status = 'Planned' OR Status = 'In Progress')];
+
+        if (campaigns.isEmpty()) {
+            return;
+        }
+
+        Map<String, Id> campaignsMap = new Map<String, Id>();
+        for (Campaign campaign :campaigns) {
+            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Campaign Name: ' + campaign.Name.toLowerCase());
+            campaignsMap.put(campaign.Name.toLowerCase(), campaign.Id);
+        }
+
+        List<CampaignMember> campaignMembers = [
+            SELECT Id, ContactId, Campaign.Name
+            FROM CampaignMember
+            WHERE ContactId in :contactIds AND CampaignId in :campaignsMap.keySet()];
+
+        Set<String> contactCampaignMembers = new Set<String>();
+        for (CampaignMember campaignMember :campaignMembers) {
+            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name.toLowerCase() + ' Contact Id: ' + campaignMember.ContactId);
+            contactCampaignMembers.add(campaignMember.ContactId + campaignMember.Campaign.Name.toLowerCase());
+        }
+
+        List<CampaignMember> campaignMembersInsert = new List<CampaignMember>();
+        for (Contact contact :contactsChanged) {
+
+            // TBD - need to handle scenario where afterInsert there are valid group campaigns to add need to set the C501_CS_Created_By_Contact_Subscription__c in the beforeInsert
+            //
+
+            if (!contact.C501_CS_Created_By_Contact_Subscription__c) {
+
+                // Legacy Field Check to see if Engagement(s) should be created for Legacy contact type fields
+                //
+
+                // Check Contact.RecordTypeId (Elected Official, Organization Contact)
+                //
+
+                // Check Contact.Contact_Type__c (Picklist - Multi-Select)
+                //
+                if (!String.isBlank(contact.Contact_Type__c)) {
+                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Contact_Type__c: ' + contact.Contact_Type__c);
+                    for (String checkValue :contact.Contact_Type__c.split(';')) {
+                        String checkValueLower = checkValue.toLowerCase();
+                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
+                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
+                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Contact_Type__c Insert Campaign: ' + checkValueLower);
+                            contactCampaignMembers.add(contact.Id + checkValueLower);
+
+                            if (isUpdate) {
+                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
+                            }
+
+                            campaignMembersInsert.add(new CampaignMember(
+                                CampaignId = campaignsMap.get(checkValueLower),
+                                ContactId = contact.Id
+                            ));
+                        }
+                    }
+                }
+
+                // Check Contact.Strategy_Area__c (Picklist - Multi-Select)
+                //
+                if (!String.isBlank(contact.Strategy_Area__c)) {
+                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Strategy_Area__c: ' + contact.Strategy_Area__c);
+                    for (String checkValue :contact.Strategy_Area__c.split(';')) {
+                        String checkValueLower = checkValue.toLowerCase();
+                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
+                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
+                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Strategy_Area__c Insert Campaign: ' + checkValueLower);
+                            contactCampaignMembers.add(contact.Id + checkValueLower);
+
+                            if (isUpdate) {
+                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
+                            }
+
+                            campaignMembersInsert.add(new CampaignMember(
+                                CampaignId = campaignsMap.get(checkValueLower),
+                                ContactId = contact.Id
+                            ));
+                        }
+                    }
+                }
+
+                // Check Contact.Tags__c (Picklist - Multi-Select)
+                //
+                if (!String.isBlank(contact.Tags__c)) {
+                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Tags__c: ' + contact.Tags__c);
+                    for (String checkValue :contact.Tags__c.split(';')) {
+                        String checkValueLower = checkValue.toLowerCase();
+                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
+                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
+                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Tags__c Insert Campaign: ' + checkValueLower);
+                            contactCampaignMembers.add(contact.Id + checkValueLower);
+
+                            if (isUpdate) {
+                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
+                            }
+
+                            campaignMembersInsert.add(new CampaignMember(
+                                CampaignId = campaignsMap.get(checkValueLower),
+                                ContactId = contact.Id
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!campaignMembersInsert.isEmpty()) {
+            insert campaignMembersInsert;
+        }
+   }
+
    global static void TestSetup() {
 
         List<Account> listAccounts = new List<Account>();   
