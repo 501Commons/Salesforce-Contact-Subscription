@@ -165,7 +165,9 @@ global with sharing class C501_CS_SharedCode {
         }
     }
 */
-    global static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged, Boolean isDelete) {
+    global static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
+
+        system.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper');
 
         if (campaignMembersChanged == null || campaignMembersChanged.isEmpty()) {
             return;
@@ -195,7 +197,7 @@ global with sharing class C501_CS_SharedCode {
         List<CampaignMember> campaignMembers = [
             SELECT Id, ContactId, Campaign.Name
             FROM CampaignMember
-            WHERE ContactId in :contactIds AND Campaign.Name in :campaignIds];
+            WHERE ContactId in :contactIds AND CampaignId in :campaignIds];
 
         Map<Id, String> contactSubscriptions = new Map<Id, String>();
         for (CampaignMember campaignMember :campaignMembers) {
