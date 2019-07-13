@@ -21,6 +21,7 @@
         <name>ApexPage</name>
     </types>
     <types>
+        <members>C501_CS_CampaignMemberTrigger</members>
         <members>C501_CS_ContactTrigger</members>
         <name>ApexTrigger</name>
     </types>
@@ -49,10 +50,6 @@
         <members>CS_labelContactSubscriptionSaveSuccess</members>
         <members>CS_labelContactSubscriptionTitle</members>
         <name>CustomLabel</name>
-    </types>
-    <types>
-        <members>CustomLabels</members>
-        <name>CustomLabels</name>
     </types>
     <types>
         <members>Contact.C501_CS_Address_Information</members>
