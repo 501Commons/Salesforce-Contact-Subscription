@@ -509,7 +509,10 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
                 }
 
                 if (!insertMembers.isEmpty()) {
+
                     insert insertMembers;
+        
+                    C501_CS_SharedCode.CampaignMemberTriggerHelper(insertMembers);
                 }
             }
 
@@ -538,7 +541,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     
     // user wants to close this page
     global virtual PageReference Cancel() {
-        //idRedirect = contactRecord.Id;
+        idRedirect = contactRecord.Id;
         
         // trigger our redirect component to redirect using javascript.
         redirect = true;

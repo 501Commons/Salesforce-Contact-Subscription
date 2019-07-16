@@ -30,7 +30,56 @@
 
 global with sharing class C501_CS_SharedCode { 
 
-   global static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isUpdate) {
+/*
+    private static void SetupCampaignMembers(Map<String, Campaign> campaignsMap, Set<String> contactCampaignMembers, Map<Id, String> contactCampaigns, String[] contactTags, List<CampaignMember> campaignMembersInsert, Boolean isUpdate, Contact contact) {
+
+        for (String checkValue :contactTags) {
+
+            String checkValueLower = checkValue.toLowerCase();
+            system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue: ' + checkValueLower);
+
+            if (campaignsMap.containsKey(checkValueLower) && !contactCampaignMembers.contains(contact.Id + checkValueLower)) {
+                system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueLower);
+
+                contactCampaignMembers.add(contact.Id + checkValueLower);
+                campaignMembersInsert.add(new CampaignMember(
+                    CampaignId = campaignsMap.get(checkValueLower).Id,
+                    ContactId = contact.Id
+                ));
+
+                String subscriptions = checkValue;
+                if (contactCampaigns.containsKey(contact.Id)) {
+                    subscriptions = contactCampaigns.remove(contact.Id) + ',' + subscriptions;
+                }
+                contactCampaigns.put(contact.Id, subscriptions);
+            }
+
+            // Check to add parent campaign
+            if (campaignsMap.containsKey(checkValueLower) && !String.isBlank(campaignsMap.get(checkValueLower).ParentId)) {
+
+                String checkValueParentLower = campaignsMap.get(checkValueLower).Parent.Name;
+                system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue Parent: ' + checkValueParentLower);
+
+                if (campaignsMap.containsKey(checkValueParentLower) && !contactCampaignMembers.contains(contact.Id + checkValueParentLower)) {
+                    system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueParentLower);
+
+                    contactCampaignMembers.add(contact.Id + checkValueParentLower);
+                    campaignMembersInsert.add(new CampaignMember(
+                        CampaignId = campaignsMap.get(checkValueParentLower).Id,
+                        ContactId = contact.Id
+                    ));
+
+                    String subscriptions = checkValue;
+                    if (contactCampaigns.containsKey(contact.Id)) {
+                        subscriptions = contactCampaigns.remove(contact.Id) + ',' + subscriptions;
+                    }
+                    contactCampaigns.put(contact.Id, subscriptions);
+                }
+            }
+        }
+    }
+
+    global static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isUpdate) {
         
         List<Id> contactIds = new List<Id>();
         for (Contact contact :contactsChanged) {
@@ -38,7 +87,7 @@ global with sharing class C501_CS_SharedCode {
         }
 
         List<Campaign> campaigns = [
-            SELECT Id, Name 
+            SELECT Id, Name, ParentId, Parent.Name
             FROM Campaign
             WHERE RecordType.Name like 'Mailing List/Group' AND (Status = 'Planned' OR Status = 'In Progress')];
 
@@ -46,104 +95,67 @@ global with sharing class C501_CS_SharedCode {
             return;
         }
 
-        Map<String, Id> campaignsMap = new Map<String, Id>();
+        Map<String, Campaign> campaignsMap = new Map<String, Campaign>();
         for (Campaign campaign :campaigns) {
-            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Campaign Name: ' + campaign.Name.toLowerCase());
-            campaignsMap.put(campaign.Name.toLowerCase(), campaign.Id);
+            campaignsMap.put(campaign.Name.toLowerCase(), campaign);
         }
 
         List<CampaignMember> campaignMembers = [
             SELECT Id, ContactId, Campaign.Name
             FROM CampaignMember
-            WHERE ContactId in :contactIds AND CampaignId in :campaignsMap.keySet()];
+            WHERE ContactId in :contactIds AND Campaign.Name in :campaignsMap.keySet()];
 
         Set<String> contactCampaignMembers = new Set<String>();
+        Map<Id, String> contactCampaigns = new Map<Id, String>();
         for (CampaignMember campaignMember :campaignMembers) {
             system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name.toLowerCase() + ' Contact Id: ' + campaignMember.ContactId);
             contactCampaignMembers.add(campaignMember.ContactId + campaignMember.Campaign.Name.toLowerCase());
+
+            String subscriptions = campaignMember.Campaign.Name;
+            if (contactCampaigns.containsKey(campaignMember.ContactId)) {
+                subscriptions = contactCampaigns.remove(campaignMember.ContactId) + ',' + subscriptions;
+            }
+            contactCampaigns.put(campaignMember.ContactId, subscriptions);
         }
 
         List<CampaignMember> campaignMembersInsert = new List<CampaignMember>();
         for (Contact contact :contactsChanged) {
-
-            // TBD - need to handle scenario where afterInsert there are valid group campaigns to add need to set the C501_CS_Created_By_Contact_Subscription__c in the beforeInsert
-            //
 
             if (!contact.C501_CS_Created_By_Contact_Subscription__c) {
 
                 // Legacy Field Check to see if Engagement(s) should be created for Legacy contact type fields
                 //
 
-                // Check Contact.RecordTypeId (Elected Official, Organization Contact)
-                //
-
                 // Check Contact.Contact_Type__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Contact_Type__c)) {
-                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Contact_Type__c: ' + contact.Contact_Type__c);
-                    for (String checkValue :contact.Contact_Type__c.split(';')) {
-                        String checkValueLower = checkValue.toLowerCase();
-                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
-                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
-                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Contact_Type__c Insert Campaign: ' + checkValueLower);
-                            contactCampaignMembers.add(contact.Id + checkValueLower);
-
-                            if (isUpdate) {
-                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
-                            }
-
-                            campaignMembersInsert.add(new CampaignMember(
-                                CampaignId = campaignsMap.get(checkValueLower),
-                                ContactId = contact.Id
-                            ));
-                        }
-                    }
+                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Contact_Type__c: ' + contact.Contact_Type__c);
+                    C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Contact_Type__c.split(';'), campaignMembersInsert, isUpdate, contact);
                 }
 
                 // Check Contact.Strategy_Area__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Strategy_Area__c)) {
-                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Strategy_Area__c: ' + contact.Strategy_Area__c);
-                    for (String checkValue :contact.Strategy_Area__c.split(';')) {
-                        String checkValueLower = checkValue.toLowerCase();
-                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
-                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
-                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Strategy_Area__c Insert Campaign: ' + checkValueLower);
-                            contactCampaignMembers.add(contact.Id + checkValueLower);
-
-                            if (isUpdate) {
-                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
-                            }
-
-                            campaignMembersInsert.add(new CampaignMember(
-                                CampaignId = campaignsMap.get(checkValueLower),
-                                ContactId = contact.Id
-                            ));
-                        }
-                    }
+                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Strategy_Area__c: ' + contact.Strategy_Area__c);
+                    C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Strategy_Area__c.split(';'), campaignMembersInsert, isUpdate, contact);
                 }
 
                 // Check Contact.Tags__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Tags__c)) {
-                     system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Tags__c: ' + contact.Tags__c);
-                    for (String checkValue :contact.Tags__c.split(';')) {
-                        String checkValueLower = checkValue.toLowerCase();
-                        system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper checkValue: ' + checkValueLower);
-                        if (campaignsMap.containsKey(checkValueLower) && (contactCampaignMembers.isEmpty() || !contactCampaignMembers.contains(contact.Id + checkValueLower))) {
-                            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Tags__c Insert Campaign: ' + checkValueLower);
-                            contactCampaignMembers.add(contact.Id + checkValueLower);
+                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Tags__c: ' + contact.Tags__c);
+                    C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Tags__c.split(';'), campaignMembersInsert, isUpdate, contact);
+                }
+            }
 
-                            if (isUpdate) {
-                                contact.C501_CS_Created_By_Contact_Subscription__c = true;
-                            }
-
-                            campaignMembersInsert.add(new CampaignMember(
-                                CampaignId = campaignsMap.get(checkValueLower),
-                                ContactId = contact.Id
-                            ));
-                        }
-                    }
+            if (isUpdate) {
+                if (contactCampaigns.containsKey(contact.Id)) {
+                    contact.C501_CS_Subscriptions__c = contactCampaigns.get(contact.Id);
+                    contact.C501_CS_Created_By_Contact_Subscription__c = true;
+                }
+                else {
+                    contact.C501_CS_Subscriptions__c = '';
+                    contact.C501_CS_Created_By_Contact_Subscription__c = false;
                 }
             }
         }
@@ -151,9 +163,77 @@ global with sharing class C501_CS_SharedCode {
         if (!campaignMembersInsert.isEmpty()) {
             insert campaignMembersInsert;
         }
-   }
+    }
+*/
+    global static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
 
-   global static void TestSetup() {
+        system.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper');
+
+        if (campaignMembersChanged == null || campaignMembersChanged.isEmpty()) {
+            return;
+        }
+
+        system.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper CampaignMembers Changed: ' + campaignMembersChanged);
+
+        Set<Id> contactIds = new Set<Id>();
+        for (CampaignMember campaignMember :campaignMembersChanged) {
+            contactIds.add(campaignMember.ContactId);
+        }
+
+        List<Campaign> campaigns = [
+            SELECT Id, Name, ParentId, Parent.Name
+            FROM Campaign
+            WHERE RecordType.Name like 'Mailing List/Group' AND (Status = 'Planned' OR Status = 'In Progress')];
+
+        if (campaigns.isEmpty()) {
+            return;
+        }
+
+        List<Id> campaignIds = new List<Id>();
+        for (Campaign campaign :campaigns) {
+            campaignIds.add(campaign.Id);
+        }
+
+        List<CampaignMember> campaignMembers = [
+            SELECT Id, ContactId, Campaign.Name
+            FROM CampaignMember
+            WHERE ContactId in :contactIds AND CampaignId in :campaignIds];
+
+        Map<Id, String> contactSubscriptions = new Map<Id, String>();
+        for (CampaignMember campaignMember :campaignMembers) {
+            system.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name + ' Contact Id: ' + campaignMember.ContactId);
+
+            String subscriptions = campaignMember.Campaign.Name;
+            if (contactSubscriptions.containsKey(campaignMember.ContactId)) {
+                subscriptions = contactSubscriptions.remove(campaignMember.ContactId) + ',' + subscriptions;
+            }
+            contactSubscriptions.put(campaignMember.ContactId, subscriptions);
+        }
+
+        List<Contact> updateContacts = new List<Contact>();
+        for (Id contactId :contactIds) {
+
+            if (contactSubscriptions.containsKey(contactId)) {
+                updateContacts.add(new Contact(
+                    Id = contactId,
+                    C501_CS_Subscriptions__c = contactSubscriptions.get(contactId),
+                    C501_CS_Created_By_Contact_Subscription__c = true));
+            }
+            else {
+                updateContacts.add(new Contact(
+                    Id = contactId,
+                    C501_CS_Subscriptions__c = '',
+                    C501_CS_Created_By_Contact_Subscription__c = true));
+            }
+        }
+
+        if (!updateContacts.isEmpty()) {
+            update updateContacts;
+        }
+
+    }
+
+    global static void TestSetup() {
 
         List<Account> listAccounts = new List<Account>();   
         Integer cAccounts = 10;     
@@ -229,6 +309,14 @@ global with sharing class C501_CS_SharedCode {
         insert listOpportunityHouseholds.values();
         insert listContacts;
 
+        Campaign campaign = new Campaign(Name = 'TESTDATA Campaign');
+        insert campaign;
+
+        CampaignMember campaignMember = new CampaignMember(
+            CampaignId = campaign.Id,
+            ContactId = listContacts[0].Id);
+        insert campaignMember;
+
         PrintSalesforceStructure();
     }
 
@@ -287,13 +375,20 @@ global with sharing class C501_CS_SharedCode {
 
 /*
         for (Account account :[select Id, Name, Website, BillingStreet from Account WHERE Name LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure - ' + String.valueOf(account));
+            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Account - ' + String.valueOf(account));
         }
         for (Contact contact :[select Id, Account.Name, LastName, FirstName, Birthdate, Email from Contact WHERE LastName LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure - ' + String.valueOf(contact));
+            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Contact - ' + String.valueOf(contact));
         }
         for (Opportunity opportunity :[select Id, Name from Opportunity WHERE Name LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure - ' + String.valueOf(opportunity));
+            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Opportunity - ' + String.valueOf(opportunity));
+        }
+        for (Campaign campaign :[select Id, Name from Campaign WHERE Name LIKE 'TESTDATA%']) {
+            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Campaign - ' + String.valueOf(campaign));
+
+            for (CampaignMember campaignMember :[select Id, Name from CampaignMember WHERE CampaignId = :campaign.Id]) {
+                System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure CampaignMember - ' + String.valueOf(campaignMember));
+            }
         }
 */       
     }
