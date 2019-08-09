@@ -43,6 +43,34 @@ class C501_CTRL_ContactSubscription_TEST {
 
     //==================== TEST METHOD(s) ======================================
 
+    @isTest
+    static void EditContactCacheTest() {
+
+      System.Debug('*****EditContactCacheTest');
+
+      // Insert Record
+      C501_Contact_Cache__c contactCache = new C501_Contact_Cache__c(
+        LastName__c = 'TESTDATA',
+        FirstName__c = 'TESTDATA',
+        Email__c = 'TESTDATA@testdata.org'
+      );
+
+      insert contactCache;
+
+      Test.StartTest();
+
+      // Update Record
+      try {
+        contactCache.Type__c = 'Business';
+        update contactCache;
+      }
+      catch (Exception ex) {
+        System.debug(ex.getMessage());
+      }
+
+      Test.StopTest();
+    }
+
     @isTest(SeeAllData='true')
     static void NewContactTest() {
 

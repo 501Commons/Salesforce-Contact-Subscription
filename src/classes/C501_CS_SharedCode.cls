@@ -30,6 +30,19 @@
 
 global with sharing class C501_CS_SharedCode { 
 
+    public class ContactCacheException extends Exception {}
+
+    global static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
+
+        system.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
+
+        for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
+            if (contactCache.Type__c == 'Business') {
+                contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Company'));
+            }
+        }
+    }
+
 /*
     private static void SetupCampaignMembers(Map<String, Campaign> campaignsMap, Set<String> contactCampaignMembers, Map<Id, String> contactCampaigns, String[] contactTags, List<CampaignMember> campaignMembersInsert, Boolean isUpdate, Contact contact) {
 

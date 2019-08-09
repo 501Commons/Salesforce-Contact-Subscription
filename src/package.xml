@@ -22,10 +22,32 @@
     </types>
     <types>
         <members>C501_CS_CampaignMemberTrigger</members>
+        <members>C501_CS_ContactCacheTrigger</members>
         <members>C501_CS_ContactTrigger</members>
         <name>ApexTrigger</name>
     </types>
     <types>
+        <members>C501_Contact_Cache__c.Company__c</members>
+        <members>C501_Contact_Cache__c.Email__c</members>
+        <members>C501_Contact_Cache__c.FirstName__c</members>
+        <members>C501_Contact_Cache__c.HomePhone__c</members>
+        <members>C501_Contact_Cache__c.LastName__c</members>
+        <members>C501_Contact_Cache__c.MailingCity__c</members>
+        <members>C501_Contact_Cache__c.MailingCountry__c</members>
+        <members>C501_Contact_Cache__c.MailingPostalCode__c</members>
+        <members>C501_Contact_Cache__c.MailingState__c</members>
+        <members>C501_Contact_Cache__c.MailingStreet__c</members>
+        <members>C501_Contact_Cache__c.MiddleName__c</members>
+        <members>C501_Contact_Cache__c.Mobile__c</members>
+        <members>C501_Contact_Cache__c.OtherCity__c</members>
+        <members>C501_Contact_Cache__c.OtherCountry__c</members>
+        <members>C501_Contact_Cache__c.OtherPostalCode__c</members>
+        <members>C501_Contact_Cache__c.OtherState__c</members>
+        <members>C501_Contact_Cache__c.OtherStreet__c</members>
+        <members>C501_Contact_Cache__c.Phone__c</members>
+        <members>C501_Contact_Cache__c.Source__c</members>
+        <members>C501_Contact_Cache__c.Title__c</members>
+        <members>C501_Contact_Cache__c.Type__c</members>
         <members>Campaign.C501_CS_Remove__c</members>
         <members>Campaign.C501_CS_Subscription__c</members>
         <members>Contact.C501_CS_Created_By_Contact_Subscription__c</members>
@@ -52,6 +74,10 @@
         <name>CustomLabel</name>
     </types>
     <types>
+        <members>C501_Contact_Cache__c</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
         <members>Contact.C501_CS_Address_Information</members>
         <members>Contact.C501_CS_Assistant_Information</members>
         <members>Contact.C501_CS_Description_Information</members>
@@ -62,6 +88,11 @@
     <types>
         <members>Contact-C501 CS Contact Subscription</members>
         <name>Layout</name>
+    </types>
+    <types>
+        <members>C501_Contact_Cache__c.All</members>
+        <members>C501_Contact_Cache__c.Merge_Pending</members>
+        <name>ListView</name>
     </types>
     <types>
         <members>Bootstrap</members>
