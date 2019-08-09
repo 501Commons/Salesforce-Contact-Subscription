@@ -87,44 +87,101 @@
             <c:C501_CS_UTIL_PageMessages />
             <p class="slds-p-around--medium"><apex:outputText value="{!$Label.CS_labelContactSubscriptionHelp}" style="font-style:italic" /></p>
 
-            <apex:pageBlock title="Contact Fields">
+            <!-- Default Page Blcok -->
+            <apex:pageBlock title="Contact Fields" rendered="{!$User.UITheme <> 'Theme4t'}">
 
-                    <apex:pageBlockSection title="Standard">
+                    <apex:pageBlockSection title="Standard" columns="2">
                         <apex:repeat value="{!StandardFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Phone Contact">
+                    <apex:pageBlockSection title="Phone Contact" columns="2">
                         <apex:repeat value="{!PhoneContactFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Assistant">
+                    <apex:pageBlockSection title="Assistant" columns="2">
                         <apex:repeat value="{!AssistantFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Address">
+                    <apex:pageBlockSection title="Address" columns="2">
                         <apex:repeat value="{!AddressFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Description">
+                    <apex:pageBlockSection title="Description" columns="2">
                         <apex:repeat value="{!DescriptionFields}" var="f">
                                 <apex:inputField value="{!contactRecord[f.fieldPath]}" 
                                     required="{!OR(f.required, f.dbrequired)}"/>
                         </apex:repeat>
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Subscription">
+                    <apex:pageBlockSection title="Subscription" columns="2">
+                        <apex:actionRegion >
+                            <apex:outputLabel value="Group" for="ddlGroups"/>
+                            <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
+                                <apex:selectOptions value="{!listGroups}" /> 
+                            </apex:selectList>
+                            <apex:outputLabel value="Sub Group" for="ddlSubGroups"/>
+                            <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
+                                <apex:selectOptions value="{!listSubGroups}" /> 
+                            </apex:selectList>
+                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
+                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!RefreshSubscriptions}" value="{!$Label.CS_labelButtonRefresh}" id="btnRefresh" immediate="false" reRender="tblContactSubscriptions"/>
+                        </apex:actionRegion>
+                    </apex:pageBlockSection>
+                    
+            </apex:pageBlock>
+
+            <!-- Mobile pageBlock -->
+            <apex:pageBlock title="Contact Fields" rendered="{!$User.UITheme == 'Theme4t'}">
+
+                    <apex:pageBlockSection title="Standard" columns="1">
+                        <apex:repeat value="{!StandardFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Phone Contact" columns="1">
+                        <apex:repeat value="{!PhoneContactFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Assistant" columns="1">
+                        <apex:repeat value="{!AssistantFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Address" columns="1">
+                        <apex:repeat value="{!AddressFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Description" columns="1">
+                        <apex:repeat value="{!DescriptionFields}" var="f">
+                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
+                                    required="{!OR(f.required, f.dbrequired)}"/>
+                        </apex:repeat>
+                    </apex:pageBlockSection>
+
+                    <apex:pageBlockSection title="Subscription" columns="1">
                         <apex:actionRegion >
                             <apex:outputLabel value="Group" for="ddlGroups"/>
                             <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
@@ -146,7 +203,7 @@
                             styleClass="slds-table slds-table--compact slds-table--bordered"
                             headerClass="slds-text-heading--label slds-theme--shade" style="width:100%" >                 
 
-                <apex:column styleClass="myTD reference" >
+                <apex:column width="50px" >
                     <apex:facet name="header">Remove</apex:facet>
                     <apex:actionRegion >
                         <apex:inputField value="{!ContactSubscription.C501_CS_Remove__c}" styleClass="checkbox" required="false" >
@@ -155,7 +212,7 @@
                     </apex:actionRegion>
                 </apex:column> 
 
-                <apex:column styleClass="myTD reference" >
+                <apex:column style="width:75px" >
                     <apex:facet name="header">Status</apex:facet>
                     <apex:outputField value="{!ContactSubscription.C501_CS_Subscription__c}" styleClass="text" >
                     </apex:outputField>
@@ -167,7 +224,7 @@
                     </apex:outputField>
                 </apex:column> 
 
-                <apex:column styleClass="myTD reference" >
+                <apex:column styleClass="myTD reference" rendered="{!$User.UITheme <> 'Theme4t'}">
                     <apex:facet name="header">Subscription Parent</apex:facet>
                     <apex:outputField value="{!ContactSubscription.Parent.Name}" styleClass="text" >
                     </apex:outputField>
@@ -197,10 +254,6 @@
             <!-- PAGE FOOTER -->
             <div class="slds-page-header" role="banner">
                 <div class="slds-grid">
-                    <div class="slds-col--padded">
-                        <h1 class="slds-page-header__title slds-m-right--small slds-truncate slds-align-middle">{!$Label.CS_labelContactSubscriptionTitle}</h1>
-                    </div>        
-
                     <div class="slds-col--padded slds-no-flex slds-align-middle">
                         <div class="slds-button-group" role="group">
                             <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!Cancel}" value="{!IF(ISNULL(strSaveResults), $Label.CS_labelButtonCancel, $Label.CS_labelButtonClose)}" immediate="true" reRender="vfform"/> 
