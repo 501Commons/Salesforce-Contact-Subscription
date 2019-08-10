@@ -36,9 +36,73 @@ global with sharing class C501_CS_SharedCode {
 
         system.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
 
+        List<Account> accounts = [SELECT Id, Name FROM Account];
+        Map<String,Id> accountMap = new Map<String,Id>();
+        for (Account account :accounts) {
+            accountMap.put(account.Name, account.Id);
+        }
+
+        List<Account> insertAccounts = new List<Account>();
+        List<C501_Contact_Cache__c> insertContactCaches = new List<C501_Contact_Cache__c>();
         for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
-            if (contactCache.Type__c == 'Business') {
+
+            if (contactCache.Type__c <> 'Business') {
+                continue;
+            }
+
+            if (String.isBlank(contactCache.FirstName__c) || String.isBlank(contactCache.LastName__c) || String.isBlank(contactCache.Email__c) || String.isBlank(contactCache.Company__c)) {
                 contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Company'));
+            }
+            else {
+                if (!accountMap.containsKey(contactCache.Company__c)) {
+
+                    insertAccounts.add(new Account(Name = contactCache.Company__c));
+                    accountMap.put(contactCache.Company__c, null);
+                }
+
+                insertContactCaches.add(contactCache);
+            }
+        }
+
+        if (!insertAccounts.isEmpty()) {
+            System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper insertAccounts: ' + insertAccounts);
+            insert insertAccounts;
+
+            for (Account account :insertAccounts) {
+                accountMap.remove(account.Name);
+                accountMap.put(account.Name, account.Id);
+            }
+        }
+
+        if (!insertContactCaches.isEmpty()) {
+
+            List<Contact> insertContacts = new List<Contact>();
+            for (C501_Contact_Cache__c contactCache :insertContactCaches) {
+                insertContacts.add( new Contact(
+                    AccountId = accountMap.get(contactCache.Company__c),
+                    Email = contactCache.Email__c,
+                    FirstName = contactCache.FirstName__c,
+                    HomePhone = contactCache.HomePhone__c,
+                    LastName = contactCache.LastName__c,
+                    MailingCity = contactCache.MailingCity__c,
+                    MailingCountry = contactCache.MailingCountry__c,
+                    MailingPostalCode = contactCache.MailingPostalCode__c,
+                    MailingState = contactCache.MailingState__c,
+                    MailingStreet = contactCache.MailingStreet__c,
+                    //MiddleName = contactCache.MiddleName__c,
+                    MobilePhone = contactCache.Mobile__c,
+                    OtherCity = contactCache.OtherCity__c,
+                    OtherCountry = contactCache.OtherCountry__c,
+                    OtherPostalCode = contactCache.OtherPostalCode__c,
+                    OtherState = contactCache.OtherState__c,
+                    OtherStreet = contactCache.OtherStreet__c,
+                    Phone = contactCache.Phone__c,
+                    Title = contactCache.Title__c));
+            }
+
+            if (!insertContacts.isEmpty()) {
+                System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper insertContacts: ' + insertContacts);
+                insert insertContacts;
             }
         }
     }

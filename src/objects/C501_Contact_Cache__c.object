@@ -323,6 +323,7 @@
         <columns>FirstName__c</columns>
         <columns>LastName__c</columns>
         <columns>Email__c</columns>
+        <columns>Company__c</columns>
         <columns>NAME</columns>
         <filterScope>Mine</filterScope>
         <filters>
