@@ -53,7 +53,7 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <fields>
-        <fullName>Company__c</fullName>
+        <fullName>Company_Name__c</fullName>
         <externalId>false</externalId>
         <label>Company</label>
         <length>128</length>
@@ -166,6 +166,18 @@
         <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Phone</type>
+    </fields>
+    <fields>
+        <fullName>Organization__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Organization</label>
+        <referenceTo>Account</referenceTo>
+        <relationshipLabel>Contacts Cache</relationshipLabel>
+        <relationshipName>Contacts_Cache</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
     </fields>
     <fields>
         <fullName>OtherCity__c</fullName>
@@ -323,7 +335,7 @@
         <columns>FirstName__c</columns>
         <columns>LastName__c</columns>
         <columns>Email__c</columns>
-        <columns>Company__c</columns>
+        <columns>Company_Name__c</columns>
         <columns>NAME</columns>
         <filterScope>Mine</filterScope>
         <filters>

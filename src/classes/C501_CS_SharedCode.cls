@@ -36,13 +36,6 @@ global with sharing class C501_CS_SharedCode {
 
         system.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
 
-        List<Account> accounts = [SELECT Id, Name FROM Account];
-        Map<String,Id> accountMap = new Map<String,Id>();
-        for (Account account :accounts) {
-            accountMap.put(account.Name, account.Id);
-        }
-
-        List<Account> insertAccounts = new List<Account>();
         List<C501_Contact_Cache__c> insertContactCaches = new List<C501_Contact_Cache__c>();
         for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
 
@@ -50,27 +43,12 @@ global with sharing class C501_CS_SharedCode {
                 continue;
             }
 
-            if (String.isBlank(contactCache.FirstName__c) || String.isBlank(contactCache.LastName__c) || String.isBlank(contactCache.Email__c) || String.isBlank(contactCache.Company__c)) {
-                contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Company'));
+            if (String.isBlank(contactCache.FirstName__c) || String.isBlank(contactCache.LastName__c) || String.isBlank(contactCache.Email__c) || String.isBlank(contactCache.Organization__c)) {
+                contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Organization'));
+                continue;
             }
             else {
-                if (!accountMap.containsKey(contactCache.Company__c)) {
-
-                    insertAccounts.add(new Account(Name = contactCache.Company__c));
-                    accountMap.put(contactCache.Company__c, null);
-                }
-
                 insertContactCaches.add(contactCache);
-            }
-        }
-
-        if (!insertAccounts.isEmpty()) {
-            System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper insertAccounts: ' + insertAccounts);
-            insert insertAccounts;
-
-            for (Account account :insertAccounts) {
-                accountMap.remove(account.Name);
-                accountMap.put(account.Name, account.Id);
             }
         }
 
@@ -79,7 +57,7 @@ global with sharing class C501_CS_SharedCode {
             List<Contact> insertContacts = new List<Contact>();
             for (C501_Contact_Cache__c contactCache :insertContactCaches) {
                 insertContacts.add( new Contact(
-                    AccountId = accountMap.get(contactCache.Company__c),
+                    AccountId = contactCache.Organization__c,
                     Email = contactCache.Email__c,
                     FirstName = contactCache.FirstName__c,
                     HomePhone = contactCache.HomePhone__c,

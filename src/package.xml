@@ -27,7 +27,7 @@
         <name>ApexTrigger</name>
     </types>
     <types>
-        <members>C501_Contact_Cache__c.Company__c</members>
+        <members>C501_Contact_Cache__c.Company_Name__c</members>
         <members>C501_Contact_Cache__c.Email__c</members>
         <members>C501_Contact_Cache__c.FirstName__c</members>
         <members>C501_Contact_Cache__c.HomePhone__c</members>
@@ -39,6 +39,7 @@
         <members>C501_Contact_Cache__c.MailingStreet__c</members>
         <members>C501_Contact_Cache__c.MiddleName__c</members>
         <members>C501_Contact_Cache__c.Mobile__c</members>
+        <members>C501_Contact_Cache__c.Organization__c</members>
         <members>C501_Contact_Cache__c.OtherCity__c</members>
         <members>C501_Contact_Cache__c.OtherCountry__c</members>
         <members>C501_Contact_Cache__c.OtherPostalCode__c</members>
