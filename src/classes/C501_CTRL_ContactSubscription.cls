@@ -479,7 +479,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
             }
 
             if (numberOfSubscriptions <= 0) {
-                ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.ERROR, 'Contact must has at least 1 subscription'));
+                ApexPages.addMessage(new ApexPages.message(ApexPages.Severity.ERROR, 'Contact must have at least 1 subscription'));
                 return null;
             }
 

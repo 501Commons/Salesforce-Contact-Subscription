@@ -146,6 +146,10 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>Dietary_Restrictions__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Description</field>
             </layoutItems>
         </layoutColumns>
@@ -291,6 +295,13 @@
         <fields>FGM_Base__Status__c</fields>
         <fields>FGM_Base__Due_Date__c</fields>
         <relatedList>FGM_Base__Grantee_Report__c.FGM_Base__Submitted_By__c</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>CREATED_DATE</fields>
+        <fields>c501mm__Field__c</fields>
+        <fields>c501mm__Merge_Value__c</fields>
+        <fields>c501mm__Ignore_Value__c</fields>
+        <relatedList>c501mm__C501_Merge_Contact_History__c.c501mm__Contact__c</relatedList>
     </relatedLists>
     <relatedLists>
         <fields>TASK.SUBJECT</fields>
