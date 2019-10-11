@@ -34,7 +34,7 @@ global with sharing class C501_CS_SharedCode {
 
     global static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
 
-        system.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
+        System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
 
         List<C501_Contact_Cache__c> insertContactCaches = new List<C501_Contact_Cache__c>();
         for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
@@ -91,10 +91,10 @@ global with sharing class C501_CS_SharedCode {
         for (String checkValue :contactTags) {
 
             String checkValueLower = checkValue.toLowerCase();
-            system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue: ' + checkValueLower);
+            System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue: ' + checkValueLower);
 
             if (campaignsMap.containsKey(checkValueLower) && !contactCampaignMembers.contains(contact.Id + checkValueLower)) {
-                system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueLower);
+                System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueLower);
 
                 contactCampaignMembers.add(contact.Id + checkValueLower);
                 campaignMembersInsert.add(new CampaignMember(
@@ -113,10 +113,10 @@ global with sharing class C501_CS_SharedCode {
             if (campaignsMap.containsKey(checkValueLower) && !String.isBlank(campaignsMap.get(checkValueLower).ParentId)) {
 
                 String checkValueParentLower = campaignsMap.get(checkValueLower).Parent.Name;
-                system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue Parent: ' + checkValueParentLower);
+                System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue Parent: ' + checkValueParentLower);
 
                 if (campaignsMap.containsKey(checkValueParentLower) && !contactCampaignMembers.contains(contact.Id + checkValueParentLower)) {
-                    system.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueParentLower);
+                    System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueParentLower);
 
                     contactCampaignMembers.add(contact.Id + checkValueParentLower);
                     campaignMembersInsert.add(new CampaignMember(
@@ -163,7 +163,7 @@ global with sharing class C501_CS_SharedCode {
         Set<String> contactCampaignMembers = new Set<String>();
         Map<Id, String> contactCampaigns = new Map<Id, String>();
         for (CampaignMember campaignMember :campaignMembers) {
-            system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name.toLowerCase() + ' Contact Id: ' + campaignMember.ContactId);
+            System.debug('*****C501_CS_Shared_Code::ContactTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name.toLowerCase() + ' Contact Id: ' + campaignMember.ContactId);
             contactCampaignMembers.add(campaignMember.ContactId + campaignMember.Campaign.Name.toLowerCase());
 
             String subscriptions = campaignMember.Campaign.Name;
@@ -184,21 +184,21 @@ global with sharing class C501_CS_SharedCode {
                 // Check Contact.Contact_Type__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Contact_Type__c)) {
-                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Contact_Type__c: ' + contact.Contact_Type__c);
+                    System.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Contact_Type__c: ' + contact.Contact_Type__c);
                     C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Contact_Type__c.split(';'), campaignMembersInsert, isUpdate, contact);
                 }
 
                 // Check Contact.Strategy_Area__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Strategy_Area__c)) {
-                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Strategy_Area__c: ' + contact.Strategy_Area__c);
+                    System.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Strategy_Area__c: ' + contact.Strategy_Area__c);
                     C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Strategy_Area__c.split(';'), campaignMembersInsert, isUpdate, contact);
                 }
 
                 // Check Contact.Tags__c (Picklist - Multi-Select)
                 //
                 if (!String.isBlank(contact.Tags__c)) {
-                    system.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Tags__c: ' + contact.Tags__c);
+                    System.debug('*****C501_CS_Shared_Code::ContactTriggerHelper Check contact.Tags__c: ' + contact.Tags__c);
                     C501_CS_SharedCode.SetupCampaignMembers(campaignsMap, contactCampaignMembers, contactCampaigns, contact.Tags__c.split(';'), campaignMembersInsert, isUpdate, contact);
                 }
             }
@@ -222,16 +222,22 @@ global with sharing class C501_CS_SharedCode {
 */
     global static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
 
-        system.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper');
+        System.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper');
 
         if (campaignMembersChanged == null || campaignMembersChanged.isEmpty()) {
             return;
         }
 
-        system.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper CampaignMembers Changed: ' + campaignMembersChanged);
+        System.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper CampaignMembers Changed: ' + campaignMembersChanged);
 
         Set<Id> contactIds = new Set<Id>();
         for (CampaignMember campaignMember :campaignMembersChanged) {
+
+            if (campaignMember.ContactId == null) {
+                System.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper Skip campaign member since contactId is null which means Salesforce Data Import Wizard is managing the create process');
+                continue;
+            }
+
             contactIds.add(campaignMember.ContactId);
         }
 
@@ -256,7 +262,8 @@ global with sharing class C501_CS_SharedCode {
 
         Map<Id, String> contactSubscriptions = new Map<Id, String>();
         for (CampaignMember campaignMember :campaignMembers) {
-            system.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name + ' Contact Id: ' + campaignMember.ContactId);
+
+            System.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name + ' Contact Id: ' + campaignMember.ContactId);
 
             String subscriptions = campaignMember.Campaign.Name;
             if (contactSubscriptions.containsKey(campaignMember.ContactId)) {
@@ -390,7 +397,7 @@ global with sharing class C501_CS_SharedCode {
         Boolean nearLimit = false;
         Integer percentageMultiple = 9;
 
-        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_system_limits.htm
+        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_System_limits.htm
 
         if (Limits.getAggregateQueries() > ((Limits.getLimitAggregateQueries() / 10) * percentageMultiple)) {
             System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
