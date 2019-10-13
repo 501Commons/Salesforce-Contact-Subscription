@@ -33,13 +33,18 @@ public class C501_CS_Lead_ListView_Controller_TEST {
     
     //==================== TEST METHOD(s) ======================================
 
-    @isTest(SeeAllData='true')
-    public static void ConvertTests() {
+    @isTest(SeeAllData='false')
+    public static void ConvertListViewTests() {
 
-        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName', LastName = 'LastName', Company = 'Company')};
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_Lead_ListView_Controller_TEST::ConvertListViewTests');
+
+        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', Company = 'Company_TESTDATA')};
         insert leadsBeforeConvert;
 
-        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName', LastName = 'LastName')};
+        List<Account> accounts = new List<Account> { new Account(Name = 'Company_TESTDATA')};
+        insert accounts;
+
+        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', AccountId = accounts[0].Id)};
         insert contacts;
 
         Test.StartTest();
@@ -51,29 +56,93 @@ public class C501_CS_Lead_ListView_Controller_TEST {
 
         Test.StopTest();
 
-        List<Lead> leadsAfterConvert = [SELECT Id, FirstName, LastName, Company FROM Lead];
+        List<Lead> leadsAfterConvert = [SELECT Id, FirstName, LastName, Company FROM Lead WHERE LastName like '%TESTDATA' AND IsConverted = false];
         System.assert(leadsAfterConvert.isEmpty(), '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected all leads to be converted');
     }
 
-    @isTest(SeeAllData='true')
-    public static void DoNotConvertTests() {
+    @isTest(SeeAllData='false')
+    public static void ConvertTriggerTests() {
 
-        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName', LastName = 'LastName', Company = 'Company')};
-        insert leadsBeforeConvert;
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_Lead_ListView_Controller_TEST::ConvertTriggerTests');
 
-        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName', LastName = 'LastNameOther')};
+        List<Account> accounts = new List<Account> { new Account(Name = 'Company_TESTDATA')};
+        insert accounts;
+
+        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', AccountId = accounts[0].Id)};
         insert contacts;
 
         Test.StartTest();
 
-        ApexPages.StandardSetController standardController = new ApexPages.StandardSetController(leadsBeforeConvert);
-        C501_CS_Lead_ListView_Controller controller = new C501_CS_Lead_ListView_Controller(standardController);
-
-        controller.leadAutoConvertTrigger();   
+        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', Company = 'Company_TESTDATA')};
+        insert leadsBeforeConvert;
 
         Test.StopTest();
 
-        List<Lead> leadsAfterConvert = [SELECT Id, FirstName, LastName, Company FROM Lead];
-        System.assert(leadsAfterConvert.size() == leadsBeforeConvert.size(), '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected no leads to be converted.  leadsBeforeConvert: ' + leadsBeforeConvert + ' leadsAfterConvert: ' + leadsAfterConvert);
+        List<Lead> leadsAfterConvert = [SELECT Id, FirstName, LastName, Company FROM Lead WHERE LastName like '%TESTDATA' AND IsConverted = false];
+        System.assert(leadsAfterConvert.isEmpty(), '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected all leads to be converted');
+    }
+
+    @isTest(SeeAllData='false')
+    public static void ConvertExistingAccountTests() {
+
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_Lead_ListView_Controller_TEST::ConvertExistingAccountTests');
+
+        List<Account> accounts = new List<Account> { new Account(Name = 'Company_TESTDATA')};
+        insert accounts;
+
+        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', AccountId = accounts[0].Id)};
+        insert contacts;
+
+        Test.StartTest();
+
+        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', Company = 'Company_TESTDATA')};
+        insert leadsBeforeConvert;
+
+        Test.StopTest();
+
+        List<Account> accountsAfterConvert = [SELECT Id, Name FROM ACCOUNT WHERE Name like '%TESTDATA'];
+        System.assert(accountsAfterConvert.size() == 1, '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected a single account to be created - accountsAfterConvert: ' + accountsAfterConvert);
+
+        List<Contact> contactsAfterConvert = [SELECT Id, AccountId FROM Contact WHERE LastName like '%TESTDATA'];
+        System.assert(contactsAfterConvert.size() == 1, '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected a single contact to be created - contactsAfterConvert: ' + contactsAfterConvert);
+        System.assert(accountsAfterConvert[0].Id == contactsAfterConvert[0].AccountId, '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected Contact.AccountId: ' + contactsAfterConvert[0].AccountId + ' to equal Account.Id: ' + accountsAfterConvert[0].Id);
+    }
+
+    @isTest(SeeAllData='false')
+    public static void DoNotDuplicateContactTests() {
+
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_Lead_ListView_Controller_TEST::DoNotDuplicateContactTests');
+
+        List<Contact> contactsBeforeConvert = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_NOMATCH_TESTDATA')};
+        insert contactsBeforeConvert;
+
+        Test.StartTest();
+
+        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', Company = 'Company_TESTDATA')};
+        insert leadsBeforeConvert;
+
+        Test.StopTest();
+
+        List<Contact> contactsAfterConvert = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA')};
+        System.assert(contactsBeforeConvert.size() == contactsAfterConvert.size(), '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected no new contacts created - contactsBeforeConvert: ' + contactsBeforeConvert + ' contactsAfterConvert: ' + contactsAfterConvert);
+    }
+
+    @isTest(SeeAllData='false')
+    public static void DoNotConvertMissingAccountTests() {
+
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_Lead_ListView_Controller_TEST::DoNotConvertMissingAccountTests');
+
+        List<Contact> contacts = new List<Contact> { new Contact(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA')};
+        insert contacts;
+
+        Test.StartTest();
+
+        List<Lead> leadsBeforeConvert = new List<Lead> { new Lead(FirstName = 'FirstName_TESTDATA', LastName = 'LastName_TESTDATA', Company = 'Company_TESTDATA')};
+        insert leadsBeforeConvert;
+
+        Test.StopTest();
+
+        List<Lead> leadsAfterConvert = [SELECT Id, FirstName, LastName, Company FROM Lead WHERE LastName like '%TESTDATA' AND IsConverted = false];
+        System.assert(!leadsAfterConvert.isEmpty(), '****C501_CS_Lead_ListView_Controller_TEST::ConvertTests - expected leads to not be converted since missing Contact-Account relationship');
     }
 }

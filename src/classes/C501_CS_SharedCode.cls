@@ -223,15 +223,18 @@ public with sharing class C501_CS_SharedCode {
 
     //  ConvertLeads
     //
+    //  Assumptions
+    //
+    //  1) Always assume a Contact has an Associated Account (this is enforce in Salesforce)
+    //
     //  Outcomes
     //
     //  1) If the Lead.FirstName and Lead.LastName match only 1 Contact.FirstName and Contact.LastName then auto convert into the Contact
     //
-    //  2) If the Lead.FirstName and Lead.LastName don't match any Contact.FirstName and Contact.LastName then convert into a new Contact if Lead.Email and Lead.Company are not blank
     //
-    //  3) If Lead Convert and Contact.AccountId is blank & Lead.Company not blank then update Contact.AccountId
-    //
-    public static void ConvertLeadsByUserId(Boolean insertContacts) {
+    public static void ConvertLeadsByUserId() {
+
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId');
 
         String userId = UserInfo.getUserId();
         List<Lead> leads = [
@@ -252,20 +255,15 @@ public with sharing class C501_CS_SharedCode {
         AggregateResult[] allAggregatedByContacts = Database.Query(strSoql);
         for (AggregateResult result : allAggregatedByContacts)  {
             
-            String firstName = result.get('FirstName').toString();
-            String lastName = result.get('LastName').toString();
+            if (result.get('FirstName') != null && result.get('FirstName') != null) {
+                String firstName = result.get('FirstName').toString();
+                String lastName = result.get('LastName').toString();
 
-            contactNameMap.put(firstName + ' ' + lastName, result);
+                contactNameMap.put(firstName + ' ' + lastName, result);
+            }
         }
 
-        Map<String, String> accountMap = new Map<String, String>();
-        for (Account account :[SELECT Id, Name FROM Account WHERE IsDeleted = false ORDER BY LastModifiedDate DESC]) {
-          if (accountMap.containsKey(account.Name)) {
-            continue;
-          }
-
-          accountMap.put(account.Name, account.Id);
-        }
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - contactNameMap: ' + contactNameMap);
 
         // Check for unique match only to convert
         List<Database.LeadConvert> convertLeads = new List<Database.LeadConvert>();
@@ -278,67 +276,27 @@ public with sharing class C501_CS_SharedCode {
             String firstName = result.get('FirstName').toString();
             String lastName = result.get('LastName').toString();
             String contactId = result.get('Contact_Id').toString();
-            String accountName = result.get('Account_Name').toString();
-            String accountId = result.get('Account_Id').toString();
+            String accountName = result.get('Account_Name') == null ? '' : result.get('Account_Name').toString();
+            String accountId = result.get('Account_Id') == null ? '' : result.get('Account_Id').toString();
 
             if (totalMatches == 1) {
+                System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - convert lead - 1 match');
 
-              // Convert to existing contact
-              //
-              Database.LeadConvert convertLead = new database.LeadConvert();
-              convertLead.setLeadId(lead.Id);
-              convertLead.convertedStatus = 'Qualified';
-              convertLead.setDoNotCreateOpportunity(true);
-              convertLead.contactid = contactId;
-              convertLead.accountid = accountId;
-
-              // Check Account Name
-              if (String.isBlank(accountId) && !String.isBlank(lead.Company)) {
-                if (accountMap.containsKey(lead.Company)) {
-                  convertLead.accountid = accountMap.get(lead.Company);
+                // Convert to existing contact
+                //
+                Database.LeadConvert convertLead = new database.LeadConvert();
+                convertLead.setLeadId(lead.Id);
+                convertLead.convertedStatus = 'Qualified';
+                convertLead.setDoNotCreateOpportunity(true);
+                convertLead.contactid = contactId;
+                if (String.isBlank(accountId)) {
+                    // Lead Convert - both the contact and account ids must be set & account must be a parent of the contact
+                    continue;
                 }
-                else {
-                  Account insertAccount = new Account(
-                    Name = lead.Company
-                  );
 
-                  // Exception: Typically don't want to call DML commands in a loop to avoid DML limit of 100 but not expecting many of this scenario (most contacts should have an account).  If this becomes a problem then will need to handle this outside of the loop
-                  insert insertAccount;
-                  convertLead.accountid = insertAccount.Id;
-
-                  accountMap.put(insertAccount.Name, insertAccount.Id);
-                }
-              }
-
-              convertLeads.add(convertLead);
+                convertLead.accountid = accountId;
+                convertLeads.add(convertLead);
             }
-          }
-          else if (!String.isBlank(lead.Company)) {
-
-            // Create new Contact
-            //
-            Database.LeadConvert convertLead = new database.LeadConvert();
-            convertLead.setLeadId(lead.Id);
-            convertLead.convertedStatus = 'Qualified';
-            convertLead.setDoNotCreateOpportunity(true);
-
-            // Check Account Name
-            if (accountMap.containsKey(lead.Company)) {
-              convertLead.accountid = accountMap.get(lead.Company);
-            }
-            else {
-              Account insertAccount = new Account(
-                Name = lead.Company
-              );
-
-              // Exception: Typically don't want to call DML commands in a loop to avoid DML limit of 100 but not expecting many of this scenario (most accounts should already be in SF).  If this becomes a problem then will need to handle this outside of the loop
-              insert insertAccount;
-              convertLead.accountid = insertAccount.Id;
-
-              accountMap.put(insertAccount.Name, insertAccount.Id);
-            }
-
-            convertLeads.add(convertLead);
           }
         }
 
@@ -346,21 +304,25 @@ public with sharing class C501_CS_SharedCode {
 
         if(!convertLeads.isEmpty()){
           
-          // Convert in groups of 100 at a time
-          for(Integer i = 0; i <= convertLeads.size() / 100 ; i++){
+            // Convert in groups of 100 at a time
+            for(Integer i = 0; i <= convertLeads.size() / 100; i++){
 
-            list<Database.LeadConvert> convertLeadsPartial = new list<Database.LeadConvert>();
-            Integer startIndex = i*100;
-            Integer endIndex = ((startIndex + 100) < convertLeads.size()) ? startIndex + 100: convertLeads.size();
-            for(Integer j=startIndex;j < endIndex;j++){
-              convertLeadsPartial.add(convertLeads[j]);
+                list<Database.LeadConvert> convertLeadsPartial = new list<Database.LeadConvert>();
+                Integer startIndex = i * 100;
+                Integer endIndex = ((startIndex + 100) < convertLeads.size()) ? startIndex + 100: convertLeads.size();
+                for (Integer j=startIndex; j < endIndex; j++){
+                    convertLeadsPartial.add(convertLeads[j]);
+                }
+
+                Database.LeadConvertResult[] results = Database.convertLead(convertLeadsPartial, false);
+                for (Database.LeadConvertResult result : results) {
+                    if (!result.isSuccess()) {
+                        for (Database.Error err : result.getErrors()) {
+                            System.debug(LoggingLevel.ERROR, '***** C501_CS_SharedCode::ConvertLeadsByUserId Lead Convert Exception: ' + err.getMessage());
+                        }
+                    }
+                }            
             }
-
-            Database.LeadConvertResult[] results = Database.convertLead(convertLeadsPartial, false);
-            for(Database.LeadConvertResult result : results) {
-              System.assert(result.isSuccess());
-            }            
-          }
         }        
     }
 
