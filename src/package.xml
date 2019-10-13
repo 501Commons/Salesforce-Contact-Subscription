@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
+        <members>C501_CS_Lead_ListView_Controller</members>
+        <members>C501_CS_Lead_ListView_Controller_TEST</members>
         <members>C501_CS_ListView_Controller</members>
         <members>C501_CS_ListView_Controller_TEST</members>
         <members>C501_CS_SharedCode</members>
@@ -15,6 +17,7 @@
         <name>ApexComponent</name>
     </types>
     <types>
+        <members>C501_CS_Lead_ListView</members>
         <members>C501_ContactSubscription</members>
         <members>C501_CreateContact_ListView</members>
         <name>ApexPage</name>
@@ -23,7 +26,16 @@
         <members>C501_CS_CampaignMemberTrigger</members>
         <members>C501_CS_ContactCacheTrigger</members>
         <members>C501_CS_ContactTrigger</members>
+        <members>C501_CS_LeadTrigger</members>
         <name>ApexTrigger</name>
+    </types>
+    <types>
+        <members>BusinessContactManagementIcon</members>
+        <name>ContentAsset</name>
+    </types>
+    <types>
+        <members>Contact_Management</members>
+        <name>CustomApplication</name>
     </types>
     <types>
         <members>C501_Contact_Cache__c.Company_Name__c</members>
@@ -53,6 +65,8 @@
         <members>Contact.C501_CS_Created_By_Contact_Subscription__c</members>
         <members>Contact.C501_CS_Group__c</members>
         <members>Contact.C501_CS_Sub_Group__c</members>
+        <members>Contact.C501_CS_Subscriptions__c</members>
+        <members>Contact.Dietary_Restrictions__c</members>
         <name>CustomField</name>
     </types>
     <types>
@@ -86,6 +100,10 @@
         <name>FieldSet</name>
     </types>
     <types>
+        <members>Contact_Management_UtilityBar</members>
+        <name>FlexiPage</name>
+    </types>
+    <types>
         <members>Contact-C501 CS Contact Subscription</members>
         <name>Layout</name>
     </types>
@@ -106,6 +124,10 @@
         <members>v4sStaticResources</members>
         <members>wtooltip</members>
         <name>StaticResource</name>
+    </types>
+    <types>
+        <members>Lead.C501_CS_Auto_Convert</members>
+        <name>WebLink</name>
     </types>
     <types>
         <members>Contact.C501_CS_Create</members>

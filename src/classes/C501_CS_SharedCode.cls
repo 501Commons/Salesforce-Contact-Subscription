@@ -28,11 +28,11 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-global with sharing class C501_CS_SharedCode { 
+public with sharing class C501_CS_SharedCode { 
 
     public class ContactCacheException extends Exception {}
 
-    global static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
+    public static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
 
         System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
 
@@ -134,7 +134,7 @@ global with sharing class C501_CS_SharedCode {
         }
     }
 
-    global static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isUpdate) {
+    public static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isUpdate) {
         
         List<Id> contactIds = new List<Id>();
         for (Contact contact :contactsChanged) {
@@ -220,7 +220,151 @@ global with sharing class C501_CS_SharedCode {
         }
     }
 */
-    global static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
+
+    //  ConvertLeads
+    //
+    //  Outcomes
+    //
+    //  1) If the Lead.FirstName and Lead.LastName match only 1 Contact.FirstName and Contact.LastName then auto convert into the Contact
+    //
+    //  2) If the Lead.FirstName and Lead.LastName don't match any Contact.FirstName and Contact.LastName then convert into a new Contact if Lead.Email and Lead.Company are not blank
+    //
+    //  3) If Lead Convert and Contact.AccountId is blank & Lead.Company not blank then update Contact.AccountId
+    //
+    public static void ConvertLeadsByUserId(Boolean insertContacts) {
+
+        String userId = UserInfo.getUserId();
+        List<Lead> leads = [
+          SELECT Id, FirstName, LastName, Company, Email
+          FROM Lead
+          WHERE IsConverted = false AND IsDeleted = false AND (CreatedById = :userId OR LastModifiedById = :userId)];
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - size: ' + String.valueOf(leads.size()) + ' All Leads: ' + leads);
+
+        List<String> lastNames = new List<String>();
+        for (Lead lead :leads) {
+          if (!lastNames.contains(lead.LastName)) {
+            lastNames.add(lead.LastName);
+          }
+        }
+
+        Map<String, AggregateResult> contactNameMap = new Map<String, AggregateResult>();
+        String strSoql = 'SELECT Count(Id) TotalMatches, MAX(Id) Contact_Id, FirstName, LastName, MAX(AccountId) Account_Id, MAX(Account.Name) Account_Name FROM Contact WHERE IsDeleted = false Group By FirstName, LastName';
+        AggregateResult[] allAggregatedByContacts = Database.Query(strSoql);
+        for (AggregateResult result : allAggregatedByContacts)  {
+            
+            String firstName = result.get('FirstName').toString();
+            String lastName = result.get('LastName').toString();
+
+            contactNameMap.put(firstName + ' ' + lastName, result);
+        }
+
+        Map<String, String> accountMap = new Map<String, String>();
+        for (Account account :[SELECT Id, Name FROM Account WHERE IsDeleted = false ORDER BY LastModifiedDate DESC]) {
+          if (accountMap.containsKey(account.Name)) {
+            continue;
+          }
+
+          accountMap.put(account.Name, account.Id);
+        }
+
+        // Check for unique match only to convert
+        List<Database.LeadConvert> convertLeads = new List<Database.LeadConvert>();
+        for (Lead lead :leads) {
+          String name = lead.FirstName + ' ' + lead.LastName;
+          if (contactNameMap.containsKey(name)) {
+
+            AggregateResult result = contactNameMap.get(name);
+            Integer totalMatches = Integer.valueOf(result.get('TotalMatches'));
+            String firstName = result.get('FirstName').toString();
+            String lastName = result.get('LastName').toString();
+            String contactId = result.get('Contact_Id').toString();
+            String accountName = result.get('Account_Name').toString();
+            String accountId = result.get('Account_Id').toString();
+
+            if (totalMatches == 1) {
+
+              // Convert to existing contact
+              //
+              Database.LeadConvert convertLead = new database.LeadConvert();
+              convertLead.setLeadId(lead.Id);
+              convertLead.convertedStatus = 'Qualified';
+              convertLead.setDoNotCreateOpportunity(true);
+              convertLead.contactid = contactId;
+              convertLead.accountid = accountId;
+
+              // Check Account Name
+              if (String.isBlank(accountId) && !String.isBlank(lead.Company)) {
+                if (accountMap.containsKey(lead.Company)) {
+                  convertLead.accountid = accountMap.get(lead.Company);
+                }
+                else {
+                  Account insertAccount = new Account(
+                    Name = lead.Company
+                  );
+
+                  // Exception: Typically don't want to call DML commands in a loop to avoid DML limit of 100 but not expecting many of this scenario (most contacts should have an account).  If this becomes a problem then will need to handle this outside of the loop
+                  insert insertAccount;
+                  convertLead.accountid = insertAccount.Id;
+
+                  accountMap.put(insertAccount.Name, insertAccount.Id);
+                }
+              }
+
+              convertLeads.add(convertLead);
+            }
+          }
+          else if (!String.isBlank(lead.Company)) {
+
+            // Create new Contact
+            //
+            Database.LeadConvert convertLead = new database.LeadConvert();
+            convertLead.setLeadId(lead.Id);
+            convertLead.convertedStatus = 'Qualified';
+            convertLead.setDoNotCreateOpportunity(true);
+
+            // Check Account Name
+            if (accountMap.containsKey(lead.Company)) {
+              convertLead.accountid = accountMap.get(lead.Company);
+            }
+            else {
+              Account insertAccount = new Account(
+                Name = lead.Company
+              );
+
+              // Exception: Typically don't want to call DML commands in a loop to avoid DML limit of 100 but not expecting many of this scenario (most accounts should already be in SF).  If this becomes a problem then will need to handle this outside of the loop
+              insert insertAccount;
+              convertLead.accountid = insertAccount.Id;
+
+              accountMap.put(insertAccount.Name, insertAccount.Id);
+            }
+
+            convertLeads.add(convertLead);
+          }
+        }
+
+        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId convertLeads: ' + convertLeads);
+
+        if(!convertLeads.isEmpty()){
+          
+          // Convert in groups of 100 at a time
+          for(Integer i = 0; i <= convertLeads.size() / 100 ; i++){
+
+            list<Database.LeadConvert> convertLeadsPartial = new list<Database.LeadConvert>();
+            Integer startIndex = i*100;
+            Integer endIndex = ((startIndex + 100) < convertLeads.size()) ? startIndex + 100: convertLeads.size();
+            for(Integer j=startIndex;j < endIndex;j++){
+              convertLeadsPartial.add(convertLeads[j]);
+            }
+
+            Database.LeadConvertResult[] results = Database.convertLead(convertLeadsPartial, false);
+            for(Database.LeadConvertResult result : results) {
+              System.assert(result.isSuccess());
+            }            
+          }
+        }        
+    }
+
+    public static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
 
         System.debug('*****C501_CS_SharedCode::CampaignMemberTriggerHelper');
 
@@ -295,7 +439,7 @@ global with sharing class C501_CS_SharedCode {
 
     }
 
-    global static void TestSetup() {
+    public static void TestSetup() {
 
         List<Account> listAccounts = new List<Account>();   
         Integer cAccounts = 10;     
@@ -382,7 +526,7 @@ global with sharing class C501_CS_SharedCode {
         PrintSalesforceStructure();
     }
 
-    global static void PrintSalesforceLimits() {
+    public static void PrintSalesforceLimits() {
 
         System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
         System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - DML Rows ' + Limits.getDMLRows() + ' of ' + Limits.getLimitDMLRows());
@@ -392,7 +536,7 @@ global with sharing class C501_CS_SharedCode {
         System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Sosl Queries ' + Limits.getSoslQueries() + ' of ' + Limits.getLimitSoslQueries());
     }
 
-    global static Boolean NearSalesforceLimits() {
+    public static Boolean NearSalesforceLimits() {
 
         Boolean nearLimit = false;
         Integer percentageMultiple = 9;
@@ -427,7 +571,7 @@ global with sharing class C501_CS_SharedCode {
         return nearLimit;
     }
 
-    global static void PrintSalesforceStructure() {
+    public static void PrintSalesforceStructure() {
 
         System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure');
 
@@ -455,7 +599,7 @@ global with sharing class C501_CS_SharedCode {
 */       
     }
 
-    global static void CodeCoverageTempHack() {
+    public static void CodeCoverageTempHack() {
         List<String> stringValues = new List<String>{ 'a', 'b'};
 
         Integer someNumber = 1;

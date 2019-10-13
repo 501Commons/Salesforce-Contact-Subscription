@@ -28,15 +28,15 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-global virtual with sharing class C501_CTRL_ContactSubscription {
+public virtual with sharing class C501_CTRL_ContactSubscription {
 
     private List<String> listStrFields;
     private Set<String> listContactSubscriptionRequests;
     
-    global boolean redirect { get; private set; }
-    global ID idRedirect { get; private set; }
+    public boolean redirect { get; private set; }
+    public ID idRedirect { get; private set; }
     
-    global Contact contactRecord {
+    public Contact contactRecord {
         get {
             if (contactRecord == null) {
                 contactRecord = new Contact();
@@ -48,11 +48,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // constructor
-    global C501_CTRL_ContactSubscription() {
+    public C501_CTRL_ContactSubscription() {
         new C501_CTRL_ContactSubscription(null);
     }
 
-    global C501_CTRL_ContactSubscription(ApexPages.StandardController controller) {
+    public C501_CTRL_ContactSubscription(ApexPages.StandardController controller) {
 
         System.debug('***** C501_CTRL_ContactSubscription::C501_CTRL_ContactSubscription Constructor');
 
@@ -114,11 +114,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }   
     
     // getter - reference in Visualforce as StandardFields
-    global List<Schema.FieldSetMember> getStandardFields() {
+    public List<Schema.FieldSetMember> getStandardFields() {
         return fieldSetStandardActive.getFields();
     }
 
-    global Schema.FieldSet fieldSetStandardActive {
+    public Schema.FieldSet fieldSetStandardActive {
         get {
 
             Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Standard_Information;
@@ -137,11 +137,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // getter - reference in Visualforce as PhoneContactFields
-    global List<Schema.FieldSetMember> getPhoneContactFields() {
+    public List<Schema.FieldSetMember> getPhoneContactFields() {
         return fieldSetPhoneContactActive.getFields();
     }
 
-    global Schema.FieldSet fieldSetPhoneContactActive {
+    public Schema.FieldSet fieldSetPhoneContactActive {
         get {
 
             Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Phone_Contact_Information;
@@ -160,11 +160,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // getter - reference in Visualforce as AssistantFields
-    global List<Schema.FieldSetMember> getAssistantFields() {
+    public List<Schema.FieldSetMember> getAssistantFields() {
         return fieldSetAssistantActive.getFields();
     }
 
-    global Schema.FieldSet fieldSetAssistantActive {
+    public Schema.FieldSet fieldSetAssistantActive {
         get {
 
             Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Assistant_Information;
@@ -183,11 +183,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // getter - reference in Visualforce as AddressFields
-    global List<Schema.FieldSetMember> getAddressFields() {
+    public List<Schema.FieldSetMember> getAddressFields() {
         return fieldSetAddressActive.getFields();
     }
 
-    global Schema.FieldSet fieldSetAddressActive {
+    public Schema.FieldSet fieldSetAddressActive {
         get {
 
             Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Address_Information;
@@ -206,11 +206,11 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // getter - reference in Visualforce as DescriptionFields
-    global List<Schema.FieldSetMember> getDescriptionFields() {
+    public List<Schema.FieldSetMember> getDescriptionFields() {
         return fieldSetDescriptionActive.getFields();
     }
 
-    global Schema.FieldSet fieldSetDescriptionActive {
+    public Schema.FieldSet fieldSetDescriptionActive {
         get {
 
             Schema.FieldSet fieldSetCheck = SObjectType.Contact.FieldSets.C501_CS_Description_Information;
@@ -229,9 +229,9 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // status string for reporting the results of saving.
-    global String strSaveResults { get; set; }
+    public String strSaveResults { get; set; }
 
-    global List<SelectOption> listGroups {
+    public List<SelectOption> listGroups {
         get {
             if (listGroups == null )
                 listGroups = this.ListGroups();
@@ -242,7 +242,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         set;
         }
 
-    global List<SelectOption> listSubGroups {
+    public List<SelectOption> listSubGroups {
         get {
             if (listSubGroups == null )
                 listSubGroups = this.ListSubGroups(contactRecord.C501_CS_Group__c);
@@ -254,7 +254,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // The list of contact subscriptions.
-    global List<Campaign> listContactSubscriptions {
+    public List<Campaign> listContactSubscriptions {
         get {
             if (listContactSubscriptions == null) {
                 System.debug('*****C501_CTRL_ContactSubscrition::listContactSubscriptions');
@@ -269,7 +269,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         set;
     }
 
-    global List<SelectOption> ListGroups() {
+    public List<SelectOption> ListGroups() {
 
         Set<String> setGroupUnique = new Set<String>();
         List<SelectOption> listGroup = new List<SelectOption>();
@@ -284,7 +284,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         return listGroup;
     }
 
-    global List<SelectOption> ListSubGroups(String groupFilter) {
+    public List<SelectOption> ListSubGroups(String groupFilter) {
 
         Set<String> setGroupUnique = new Set<String>();
         List<SelectOption> listGroup = new List<SelectOption>();
@@ -306,7 +306,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // helper function that the client can override, to query for the appropriate fields in contacts.
-    global virtual void FillContactSubscriptions() {
+    public virtual void FillContactSubscriptions() {
 
         List<String> subscribedCampaignIds = new List<String>();
         if (!String.isBlank(contactRecord.Id)) {
@@ -338,7 +338,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
     
     // the user has changed the Group dropdown
-    global virtual PageReference ChangeGroup() {
+    public virtual PageReference ChangeGroup() {
 
         contactRecord.C501_CS_Sub_Group__c = '';
         listSubGroups = null;
@@ -348,7 +348,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // the user has changed the Group Action dropdown
-    global virtual PageReference RefreshSubscriptions() {
+    public virtual PageReference RefreshSubscriptions() {
 
         System.debug('*****C501_CTRL_ContactSubscrition::RefreshSubscriptions');
 
@@ -362,7 +362,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     // the user has changed the Group Action dropdown
-    global virtual PageReference OnChangeRemoveSubscription() {
+    public virtual PageReference OnChangeRemoveSubscription() {
 
         for (Campaign contactSubscription : listContactSubscriptions) {
 
@@ -383,7 +383,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
         return null;
     }
 
-    global virtual PageReference AddSubscription() {
+    public virtual PageReference AddSubscription() {
 
         System.debug('*****C501_CTRL_ContactSubscrition::AddSubscription');
 
@@ -451,7 +451,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     //save the Contacts created or modified
-    global virtual PageReference SaveContact() {
+    public virtual PageReference SaveContact() {
         
         if (listContactSubscriptions == null) return null;
         
@@ -529,7 +529,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
 
     //save the Contacts modified, and then close the page.
-    global virtual PageReference SaveAndCloseContact() {
+    public virtual PageReference SaveAndCloseContact() {
         SaveContact();
         if (ApexPages.hasMessages(ApexPages.Severity.ERROR) ||
            ApexPages.hasMessages(ApexPages.Severity.FATAL) ||
@@ -540,7 +540,7 @@ global virtual with sharing class C501_CTRL_ContactSubscription {
     }
     
     // user wants to close this page
-    global virtual PageReference Cancel() {
+    public virtual PageReference Cancel() {
         idRedirect = contactRecord.Id;
         
         // trigger our redirect component to redirect using javascript.

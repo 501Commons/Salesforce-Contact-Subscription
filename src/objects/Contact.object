@@ -197,6 +197,27 @@
         <type>Text</type>
         <unique>false</unique>
     </fields>
+    <fields>
+        <fullName>C501_CS_Subscriptions__c</fullName>
+        <externalId>false</externalId>
+        <label>Subscriptions</label>
+        <length>32768</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Dietary_Restrictions__c</fullName>
+        <externalId>false</externalId>
+        <label>Dietary Restrictions</label>
+        <length>128</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
     <webLinks>
         <fullName>C501_CS_Create</fullName>
         <availability>online</availability>
