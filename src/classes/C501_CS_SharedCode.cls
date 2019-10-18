@@ -241,7 +241,6 @@ public with sharing class C501_CS_SharedCode {
           SELECT Id, FirstName, LastName, Company, Email
           FROM Lead
           WHERE IsConverted = false AND IsDeleted = false AND (CreatedById = :userId OR LastModifiedById = :userId)];
-        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - size: ' + String.valueOf(leads.size()) + ' All Leads: ' + leads);
 
         List<String> lastNames = new List<String>();
         for (Lead lead :leads) {
@@ -255,15 +254,52 @@ public with sharing class C501_CS_SharedCode {
         AggregateResult[] allAggregatedByContacts = Database.Query(strSoql);
         for (AggregateResult result : allAggregatedByContacts)  {
             
-            if (result.get('FirstName') != null && result.get('FirstName') != null) {
+            if (result.get('FirstName') != null && result.get('LastName') != null) {
                 String firstName = result.get('FirstName').toString();
                 String lastName = result.get('LastName').toString();
 
-                contactNameMap.put(firstName + ' ' + lastName, result);
+                String name = firstName + ' ' + lastName;
+                if (contactNameMap.containsKey(name)) {
+
+                    // Remove from consideration since potential match already added related to a double name scenario
+                    contactNameMap.remove(name);
+                }
+                else {
+                    contactNameMap.put(name, result);
+                }
+
+                // Check for Double FirstName and/or Double LastName
+                //
+                List<String> firstNamesParts = new List<String> { firstName };
+                List<String> lastNamesParts = new List<String> { lastName };
+                if (firstName.contains(' ')) {
+                    firstNamesParts = firstName.split(' ');
+                }
+                if (lastName.contains(' ')) {
+                    lastNamesParts = lastName.split(' ');
+                }
+                else if (lastName.contains('-')) {
+                    // Check for Double LastName by space
+                    lastNamesParts = lastName.split('-');
+                }
+
+                if (firstNamesParts.size() > 1 || lastNamesParts.size() > 1) {
+                    for (String firstNamePart :firstNamesParts) {
+                        for (String lastNamePart :lastNamesParts) {
+                            name = firstNamePart + ' ' + lastNamePart;
+                            if (contactNameMap.containsKey(name)) {
+
+                                // Remove from consideration since potential match already added related to a double name scenario
+                                contactNameMap.remove(name);
+                            }
+                            else {
+                                contactNameMap.put(name, result);
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - contactNameMap: ' + contactNameMap);
 
         // Check for unique match only to convert
         List<Database.LeadConvert> convertLeads = new List<Database.LeadConvert>();
@@ -280,7 +316,6 @@ public with sharing class C501_CS_SharedCode {
             String accountId = result.get('Account_Id') == null ? '' : result.get('Account_Id').toString();
 
             if (totalMatches == 1) {
-                System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId - convert lead - 1 match');
 
                 // Convert to existing contact
                 //

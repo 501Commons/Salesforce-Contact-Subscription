@@ -15,6 +15,7 @@ salesforce-food-bank.sublime-workspace
 /resource-bundles/Angular.resource/bower_components*
 .sfdx/
 .vscode/
+.vscode/settings.json
 test_results*
 /temp
 ~*
