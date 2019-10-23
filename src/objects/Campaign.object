@@ -30,4 +30,24 @@
             </valueSetDefinition>
         </valueSet>
     </fields>
+    <listViews>
+        <fullName>Contact_Subscriptions</fullName>
+        <columns>PARENT_NAME</columns>
+        <columns>CAMPAIGN.NAME</columns>
+        <columns>CAMPAIGN.ACTIVE</columns>
+        <columns>CAMPAIGN.START_DATE</columns>
+        <columns>CAMPAIGN.END_DATE</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>CAMPAIGN.ACTIVE</field>
+            <operation>equals</operation>
+            <value>1</value>
+        </filters>
+        <filters>
+            <field>CAMPAIGN.RECORDTYPE</field>
+            <operation>equals</operation>
+            <value>Campaign.Mailing_List_Group</value>
+        </filters>
+        <label>Contact Subscriptions</label>
+    </listViews>
 </CustomObject>

@@ -110,6 +110,7 @@
     <types>
         <members>C501_Contact_Cache__c.All</members>
         <members>C501_Contact_Cache__c.Merge_Pending</members>
+        <members>Campaign.Contact_Subscriptions</members>
         <name>ListView</name>
     </types>
     <types>

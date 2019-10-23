@@ -323,14 +323,14 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
         System.debug('*****C501_CTRL_ContactSubscrition::FillContactSubscriptions subscribedCampaignIds: ' + subscribedCampaignIds + ' listContactSubscriptionRequests: ' + listContactSubscriptionRequests);
 
         // Add Active Subscriptions
-        String strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE Id in :subscribedCampaignIds';
+        String strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND Id in :subscribedCampaignIds';
         for (Campaign campaignRecord :Database.Query(strSoql)) {
             campaignRecord.C501_CS_Subscription__c = 'Active';
             listContactSubscriptions.add(campaignRecord);
         }
 
         // Add Requested Subscriptions
-        strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE (NOT Id in :subscribedCampaignIds) AND Id in :listContactSubscriptionRequests';
+        strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND (NOT Id in :subscribedCampaignIds) AND Id in :listContactSubscriptionRequests';
         for (Campaign campaignRecord :Database.Query(strSoql)) {
             campaignRecord.C501_CS_Subscription__c = 'Requested';
             listContactSubscriptions.add(campaignRecord);
