@@ -88,6 +88,7 @@
         <name>CustomLabel</name>
     </types>
     <types>
+        <members>Affiliation__c</members>
         <members>C501_Contact_Cache__c</members>
         <name>CustomObject</name>
     </types>

@@ -252,6 +252,12 @@
         </relatedContentItems>
     </relatedContent>
     <relatedLists>
+        <fields>NAME</fields>
+        <fields>Account.NAME</fields>
+        <fields>Status__c</fields>
+        <relatedList>Affiliation__c.Individual__c</relatedList>
+    </relatedLists>
+    <relatedLists>
         <fields>OPPORTUNITY.NAME</fields>
         <fields>ACCOUNT.NAME</fields>
         <fields>OPPORTUNITY.STAGE_NAME</fields>

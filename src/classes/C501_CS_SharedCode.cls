@@ -276,14 +276,16 @@ public with sharing class C501_CS_SharedCode {
     }
 
     public static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isInsert) {
-        
-        if (isInsert) {
-            return;
-        }
 
         Set<Id> contactIds = new Set<Id>();
         for (Contact contact :contactsChanged) {
             contactIds.add(contact.Id);
+        }
+
+        C501_CS_SharedCode.CheckAffiliation(contactIds, contactsChanged);
+
+        if (isInsert) {
+            return;
         }
 
         C501_CS_SharedCode.UpdateContactSubscriptions(contactIds, contactsChanged);
@@ -3023,6 +3025,31 @@ public with sharing class C501_CS_SharedCode {
                 break;
             }
         }
+    }
+
+    private static void CheckAffiliation(Set<Id> contactIds, List<Contact> contacts) {
+
+        Set<String> affiliationKeys = new Set<String>();
+        for (Affiliation__c affiliation : [SELECT Id, Individual__c, Organization__c FROM Affiliation__c where Individual__c in :contactIds]) {
+            affiliationKeys.add(String.valueOf(affiliation.Individual__c) + String.valueOf(affiliation.Organization__c));
+        }
+
+        List<Affiliation__c> insertAffiliations = new List<Affiliation__c>();
+        for (Contact contactRecord :contacts) {
+
+            if (String.isBlank((String)contactRecord.Id) || String.isBlank((String)contactRecord.AccountId)) {
+                continue;
+            }
+
+            if (!affiliationKeys.contains(String.valueOf(contactRecord.Id) + String.valueOf(contactRecord.AccountId))) {
+                insertAffiliations.add(new Affiliation__c(
+                    Individual__c = contactRecord.Id,
+                    Organization__c = contactRecord.AccountId
+                ));
+            }
+        }
+
+        Database.insert(insertAffiliations, false);
     }
 
     private static void UpdateContactSubscriptions(Set<Id> contactIds, List<Contact> contacts) {
