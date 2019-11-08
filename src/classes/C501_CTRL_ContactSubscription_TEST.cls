@@ -46,7 +46,7 @@ class C501_CTRL_ContactSubscription_TEST {
     @isTest
     static void EditContactCacheTest() {
 
-      System.Debug('*****EditContactCacheTest');
+      System.Debug('EditContactCacheTest');
 
       // Insert Record
       C501_Contact_Cache__c contactCache = new C501_Contact_Cache__c(
@@ -77,7 +77,7 @@ class C501_CTRL_ContactSubscription_TEST {
       C501_CS_SharedCode.TestSetup();
 
       Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
-      System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
+      System.Debug('EditContactTest - contactId: ' + objContact.Id);
 
       Test.StartTest();
 
@@ -89,7 +89,7 @@ class C501_CTRL_ContactSubscription_TEST {
       // test the save!
       ctrl.SaveContact();
 
-      System.debug('***** C501_CTRL_ContactSubscription_TEST::NewContactTest' + ctrl.strSaveResults);
+      System.debug('C501_CTRL_ContactSubscription_TEST::NewContactTest' + ctrl.strSaveResults);
       //System.Assert(ctrl.strSaveResults.startsWith('Error'));
 
       ctrl.SaveContact();      
@@ -104,7 +104,7 @@ class C501_CTRL_ContactSubscription_TEST {
       C501_CS_SharedCode.TestSetup();
 
       Contact objContact = [SELECT Id FROM Contact WHERE Name LIKE '%TESTDATA%' ORDER BY Id ASC LIMIT 1];
-      System.Debug('*****EditContactTest - contactId: ' + objContact.Id);
+      System.Debug('EditContactTest - contactId: ' + objContact.Id);
 
       Test.StartTest();
 
@@ -116,7 +116,7 @@ class C501_CTRL_ContactSubscription_TEST {
       // test the save!
       ctrl.SaveContact();
 
-      System.debug('***** C501_CTRL_ContactSubscription_TEST::EditContactTest' + ctrl.strSaveResults);
+      System.debug('C501_CTRL_ContactSubscription_TEST::EditContactTest' + ctrl.strSaveResults);
       //System.Assert(ctrl.strSaveResults.startsWith('Error'));
 
       ctrl.SaveContact();      

@@ -67,6 +67,7 @@
         <members>Contact.C501_CS_Sub_Group__c</members>
         <members>Contact.C501_CS_Subscriptions__c</members>
         <members>Contact.Dietary_Restrictions__c</members>
+        <members>Lead.Engagement_Id__c</members>
         <name>CustomField</name>
     </types>
     <types>

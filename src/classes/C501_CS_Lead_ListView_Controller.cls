@@ -35,7 +35,7 @@ public without sharing class C501_CS_Lead_ListView_Controller {
 
     public PageReference leadAutoConvertTrigger() {
 
-        C501_CS_SharedCode.ConvertLeadsByUserId();
+        C501_CS_SharedCode.ConvertLeadsByUserId(null);
         return new ApexPages.Action('{!List}').invoke();
     }
 }

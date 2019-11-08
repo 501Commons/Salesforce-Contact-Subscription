@@ -34,7 +34,7 @@ public with sharing class C501_CS_SharedCode {
 
     public static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
 
-        System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper');
+        System.debug('C501_CS_SharedCode::ContactCacheTriggerHelper');
 
         List<C501_Contact_Cache__c> insertContactCaches = new List<C501_Contact_Cache__c>();
         for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
@@ -79,7 +79,7 @@ public with sharing class C501_CS_SharedCode {
             }
 
             if (!insertContacts.isEmpty()) {
-                System.debug('*****C501_CS_SharedCode::ContactCacheTriggerHelper insertContacts: ' + insertContacts);
+                System.debug('C501_CS_SharedCode::ContactCacheTriggerHelper insertContacts: ' + insertContacts);
                 insert insertContacts;
             }
         }
@@ -91,10 +91,10 @@ public with sharing class C501_CS_SharedCode {
         for (String checkValue :contactTags) {
 
             String checkValueLower = checkValue.toLowerCase();
-            System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue: ' + checkValueLower);
+            System.debug('C501_CS_Shared_Code::SetupCampaignMembers checkValue: ' + checkValueLower);
 
             if (campaignsMap.containsKey(checkValueLower) && !contactCampaignMembers.contains(contact.Id + checkValueLower)) {
-                System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueLower);
+                System.debug('C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueLower);
 
                 contactCampaignMembers.add(contact.Id + checkValueLower);
                 campaignMembersInsert.add(new CampaignMember(
@@ -113,10 +113,10 @@ public with sharing class C501_CS_SharedCode {
             if (campaignsMap.containsKey(checkValueLower) && !String.isBlank(campaignsMap.get(checkValueLower).ParentId)) {
 
                 String checkValueParentLower = campaignsMap.get(checkValueLower).Parent.Name;
-                System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers checkValue Parent: ' + checkValueParentLower);
+                System.debug('C501_CS_Shared_Code::SetupCampaignMembers checkValue Parent: ' + checkValueParentLower);
 
                 if (campaignsMap.containsKey(checkValueParentLower) && !contactCampaignMembers.contains(contact.Id + checkValueParentLower)) {
-                    System.debug('*****C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueParentLower);
+                    System.debug('C501_CS_Shared_Code::SetupCampaignMembers Contact_Type__c Insert Campaign: ' + checkValueParentLower);
 
                     contactCampaignMembers.add(contact.Id + checkValueParentLower);
                     campaignMembersInsert.add(new CampaignMember(
@@ -146,18 +146,150 @@ public with sharing class C501_CS_SharedCode {
     //  1) If the Lead.FirstName and Lead.LastName match only 1 Contact.FirstName and Contact.LastName then auto convert into the Contact
     //
     //
-    public static void ConvertLeadsByUserId() {
+    public static void CheckCampaignMembers(List<Lead> leadsChanged) {
 
-        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId');
+        if (leadsChanged.isEmpty()) {
+            return;
+        }
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CheckCampaignMembers leadsChanged Size: ' + leadsChanged.size());
+
+        String engagementId = leadsChanged[0].Engagement_Id__c;
+        List<Id> leadIds = new List<Id>();
+        for (Lead leadRecord :leadsChanged) {
+
+            if (String.isBlank(leadRecord.Id)) {
+                continue;
+            }
+
+            leadIds.add(leadRecord.Id);
+
+            if (String.isBlank(engagementId) && !String.isBlank(leadRecord.Engagement_Id__c)) {
+                engagementId = leadRecord.Engagement_Id__c;
+            }
+        }
+        
+        if (String.isBlank(engagementId)) {
+            return;
+        }
+
+        Set<String> campaignMemberKeys = new Set<String>();
+        for (CampaignMember member : [
+            SELECT Id, FirstName, LastName, CompanyOrAccount, Email
+            FROM CampaignMember
+            WHERE CampaignId = :engagementId]) {
+                String keyValue = member.FirstName + member.LastName + member.CompanyOrAccount;
+                campaignMemberKeys.add(keyValue);
+        }
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CheckCampaignMembers Existing Engagement Members: ' + campaignMemberKeys.size());
+
+        List<CampaignMember> insertCampaignMemberContacts = new List<CampaignMember>();
+        List<CampaignMember> insertCampaignMemberLeads = new List<CampaignMember>();
+        for (Lead leadChanged :leadsChanged) {
+            String keyValue = leadChanged.FirstName + leadChanged.LastName + leadChanged.Company;
+            if (!campaignMemberKeys.contains(keyValue)) {
+                if (!String.isBlank(leadChanged.ConvertedContactId)) {
+                    insertCampaignMemberContacts.add(new CampaignMember (
+                        CampaignId = engagementId,
+                        ContactId = leadChanged.ConvertedContactId
+                    ));
+                }
+                else {
+                    insertCampaignMemberLeads.add(new CampaignMember (
+                        CampaignId = engagementId,
+                        LeadId = leadChanged.Id
+                    ));
+                }
+            }
+        }
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CheckCampaignMembers Insert Engagement Member Leads: ' + insertCampaignMemberLeads.size());
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CheckCampaignMembers Insert Engagement Member Contacts: ' + insertCampaignMemberContacts.size());
+
+        if (!insertCampaignMemberLeads.isEmpty()) {
+            Database.SaveResult[] results = Database.insert(insertCampaignMemberLeads, false);
+            for (Database.SaveResult result : results) {
+                if (!result.isSuccess()) {
+                    for (Database.Error err : result.getErrors()) {
+                        System.debug(LoggingLevel.ERROR, 'C501_CS_SharedCode::CheckCampaignMembers Insert Engagement Member Leads Exception: ' + err.getMessage());
+                    }
+                }
+            }            
+        }
+
+        if (!insertCampaignMemberContacts.isEmpty()) {
+            Database.SaveResult[] results = Database.insert(insertCampaignMemberContacts, false);
+            for (Database.SaveResult result : results) {
+                if (!result.isSuccess()) {
+                    for (Database.Error err : result.getErrors()) {
+                        System.debug(LoggingLevel.ERROR, 'C501_CS_SharedCode::CheckCampaignMembers Insert Engagement Member Contacts Exception: ' + err.getMessage());
+                    }
+                }
+            }            
+        }
+
+        // Delete Converted Leads related to Campaign Import
+        List<Lead> deleteLeads = [
+            SELECT Id
+            FROM Lead
+            WHERE IsConverted = true AND Engagement_Id__c <> ''];
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CheckCampaignMembers Delete Converted Leads: ' + deleteLeads.size());
+
+        if (!deleteLeads.isEmpty())
+        {
+            Database.DeleteResult[] results = Database.delete(deleteLeads, false);
+            for (Database.DeleteResult result : results) {
+                if (!result.isSuccess()) {
+                    for (Database.Error err : result.getErrors()) {
+                        System.debug(LoggingLevel.ERROR, 'C501_CS_SharedCode::CheckCampaignMembers Delete Lead Exception: ' + err.getMessage());
+                    }
+                }
+            }            
+        }
+    }
+
+    //  ConvertLeads
+    //
+    //  Assumptions
+    //
+    //  1) Always assume a Contact has an Associated Account (this is enforce in Salesforce)
+    //
+    //  Outcomes
+    //
+    //  1) If the Lead.FirstName and Lead.LastName match only 1 Contact.FirstName and Contact.LastName then auto convert into the Contact
+    //
+    //
+    public static void ConvertLeadsByUserId(List<Lead> leadsChanged) {
 
         String userId = UserInfo.getUserId();
-        List<Lead> leads = [
-          SELECT Id, FirstName, LastName, Company, Email
-          FROM Lead
-          WHERE IsConverted = false AND IsDeleted = false AND (CreatedById = :userId OR LastModifiedById = :userId)];
+        Map<Id, Lead> leadsMap = new Map<Id, Lead>();
+        for (Lead leadRecord : [
+            SELECT Id, FirstName, LastName, Company, Email
+            FROM Lead
+            WHERE IsConverted = false AND IsDeleted = false AND (CreatedById = :userId OR LastModifiedById = :userId)]) {
+                leadsMap.put(leadRecord.Id, leadRecord);
+        }
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ConvertLeadsByUserId leadsByUser Size: ' + leadsMap.values().size());
+
+        if (leadsChanged != null && !leadsChanged.isEmpty()) {
+            for (Lead leadRecord : leadsChanged) {
+                if (!leadRecord.IsConverted && !leadRecord.IsDeleted) {
+                    leadsMap.put(leadRecord.Id, leadRecord);
+                }
+            }
+        }
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ConvertLeadsByUserId leadsMap (byUser + Changed) Size: ' + leadsMap.values().size());
+
+        if (leadsMap.values().isEmpty()) {
+            return;
+        }
 
         List<String> lastNames = new List<String>();
-        for (Lead lead :leads) {
+        for (Lead lead :leadsMap.values()) {
           if (!lastNames.contains(lead.LastName)) {
             lastNames.add(lead.LastName);
           }
@@ -217,7 +349,7 @@ public with sharing class C501_CS_SharedCode {
 
         // Check for unique match only to convert
         List<Database.LeadConvert> convertLeads = new List<Database.LeadConvert>();
-        for (Lead lead :leads) {
+        for (Lead lead :leadsMap.values()) {
           String name = lead.FirstName + ' ' + lead.LastName;
           if (contactNameMap.containsKey(name)) {
 
@@ -249,9 +381,9 @@ public with sharing class C501_CS_SharedCode {
           }
         }
 
-        System.debug(LoggingLevel.DEBUG, '*****C501_CS_SharedCode::ConvertLeadsByUserId convertLeads: ' + convertLeads);
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ConvertLeadsByUserId convertLeads size: ' + convertLeads.size());
 
-        if(!convertLeads.isEmpty()){
+        if (!convertLeads.isEmpty()){
           
             // Convert in groups of 100 at a time
             for(Integer i = 0; i <= convertLeads.size() / 100; i++){
@@ -267,15 +399,20 @@ public with sharing class C501_CS_SharedCode {
                 for (Database.LeadConvertResult result : results) {
                     if (!result.isSuccess()) {
                         for (Database.Error err : result.getErrors()) {
-                            System.debug(LoggingLevel.ERROR, '***** C501_CS_SharedCode::ConvertLeadsByUserId Lead Convert Exception: ' + err.getMessage());
+//                            if (err.getMessage().contains('already converted') || err.getMessage().contains('converted lead')) {
+//                                continue;
+//                            }
+                            System.debug(LoggingLevel.ERROR, 'C501_CS_SharedCode::ConvertLeadsByUserId Lead Convert Exception: ' + err.getMessage());
                         }
                     }
                 }            
             }
-        }        
+        }
     }
 
     public static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isInsert) {
+
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ContactTriggerHelper size: ' + contactsChanged.size());
 
         Set<Id> contactIds = new Set<Id>();
         for (Contact contact :contactsChanged) {
@@ -287,8 +424,6 @@ public with sharing class C501_CS_SharedCode {
         if (isInsert) {
             return;
         }
-
-        C501_CS_SharedCode.UpdateContactSubscriptions(contactIds, contactsChanged);
     }
 
     public static void CampaignMemberTriggerHelper( List<CampaignMember> campaignMembersChanged) {
@@ -297,20 +432,24 @@ public with sharing class C501_CS_SharedCode {
             return;
         }
 
+        System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CampaignMemberTriggerHelper size: ' + campaignMembersChanged.size());
+
         Set<Id> contactIds = new Set<Id>();
-        List<Contact> contacts = new List<Contact>();
+        Map<Id, Contact> contactsMap = new Map<Id, Contact>();
         for (CampaignMember campaignMember :campaignMembersChanged) {
 
-            if (campaignMember.ContactId == null) {
-                System.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper Skip campaign member since contactId is null which means Salesforce Data Import Wizard is managing the create process');
+            if (String.isBlank(campaignMember.ContactId)) {
                 continue;
             }
 
             contactIds.add(campaignMember.ContactId);
-            contacts.add(new Contact( Id = campaignMember.ContactId));
+            contactsMap.put(
+                campaignMember.ContactId,
+                new Contact( Id = campaignMember.ContactId));
         }
 
-        C501_CS_SharedCode.UpdateContactSubscriptions(contactIds, contacts);
+        // Make sure Contact Subscriptions is up to date
+        List<Contact> contacts = C501_CS_SharedCode.UpdateContactSubscriptions(contactIds, contactsMap.values());
 
         if (!contacts.isEmpty()) {
             update contacts;
@@ -406,12 +545,12 @@ public with sharing class C501_CS_SharedCode {
 
     public static void PrintSalesforceLimits() {
 
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - DML Rows ' + Limits.getDMLRows() + ' of ' + Limits.getLimitDMLRows());
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - DML Statments ' + Limits.getDMLStatements() + ' of ' + Limits.getLimitDMLStatements());
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Queies ' + Limits.getQueries() + ' of ' + Limits.getLimitQueries());
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Query Rows ' + Limits.getQueryRows() + ' of ' + Limits.getLimitQueryRows());
-        System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Sosl Queries ' + Limits.getSoslQueries() + ' of ' + Limits.getLimitSoslQueries());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - DML Rows ' + Limits.getDMLRows() + ' of ' + Limits.getLimitDMLRows());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - DML Statments ' + Limits.getDMLStatements() + ' of ' + Limits.getLimitDMLStatements());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - Queies ' + Limits.getQueries() + ' of ' + Limits.getLimitQueries());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - Query Rows ' + Limits.getQueryRows() + ' of ' + Limits.getLimitQueryRows());
+        System.debug('C501_CS_SharedCode::NearSalesforceLimits - Sosl Queries ' + Limits.getSoslQueries() + ' of ' + Limits.getLimitSoslQueries());
     }
 
     public static Boolean NearSalesforceLimits() {
@@ -422,27 +561,27 @@ public with sharing class C501_CS_SharedCode {
         // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_methods_System_limits.htm
 
         if (Limits.getAggregateQueries() > ((Limits.getLimitAggregateQueries() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - Aggregate Queries - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getAggregateQueries() + ' of ' + Limits.getLimitAggregateQueries());
             nearLimit = true;
         }
         if (Limits.getDMLRows() > ((Limits.getLimitDMLRows() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - DML Rows - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getDMLRows() + ' of ' + Limits.getLimitDMLRows());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - DML Rows - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getDMLRows() + ' of ' + Limits.getLimitDMLRows());
             nearLimit = true;
         }
         if (Limits.getDMLStatements() > ((Limits.getLimitDMLStatements() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - DML Statments - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getDMLStatements() + ' of ' + Limits.getLimitDMLStatements());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - DML Statments - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getDMLStatements() + ' of ' + Limits.getLimitDMLStatements());
             nearLimit = true;
         }
         if (Limits.getQueries() > ((Limits.getLimitQueries() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Queies - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getQueries() + ' of ' + Limits.getLimitQueries());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - Queies - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getQueries() + ' of ' + Limits.getLimitQueries());
             nearLimit = true;
         }
         if (Limits.getQueryRows() > ((Limits.getLimitQueryRows() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getQueryRows() + ' of ' + Limits.getLimitQueryRows());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getQueryRows() + ' of ' + Limits.getLimitQueryRows());
             nearLimit = true;
         }
         if (Limits.getSoslQueries() > ((Limits.getLimitSoslQueries() / 10) * percentageMultiple)) {
-            System.debug('***** C501_CS_SharedCode::NearSalesforceLimits - Sosl Queries - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getSoslQueries() + ' of ' + Limits.getLimitSoslQueries());
+            System.debug('C501_CS_SharedCode::NearSalesforceLimits - Sosl Queries - Query Rows ' + String.valueOf(percentageMultiple) + '0% of Limit - ' + Limits.getSoslQueries() + ' of ' + Limits.getLimitSoslQueries());
             nearLimit = true;
         }
 
@@ -451,7 +590,7 @@ public with sharing class C501_CS_SharedCode {
 
     public static void PrintSalesforceStructure() {
 
-        System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure');
+        System.debug('C501_CS_SharedCode::PrintSalesforceStructure');
 
         PrintSalesforceLimits();
 
@@ -459,19 +598,19 @@ public with sharing class C501_CS_SharedCode {
 
 /*
         for (Account account :[select Id, Name, Website, BillingStreet from Account WHERE Name LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Account - ' + String.valueOf(account));
+            System.debug('C501_CS_SharedCode::PrintSalesforceStructure Account - ' + String.valueOf(account));
         }
         for (Contact contact :[select Id, Account.Name, LastName, FirstName, Birthdate, Email from Contact WHERE LastName LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Contact - ' + String.valueOf(contact));
+            System.debug('C501_CS_SharedCode::PrintSalesforceStructure Contact - ' + String.valueOf(contact));
         }
         for (Opportunity opportunity :[select Id, Name from Opportunity WHERE Name LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Opportunity - ' + String.valueOf(opportunity));
+            System.debug('C501_CS_SharedCode::PrintSalesforceStructure Opportunity - ' + String.valueOf(opportunity));
         }
         for (Campaign campaign :[select Id, Name from Campaign WHERE Name LIKE 'TESTDATA%']) {
-            System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure Campaign - ' + String.valueOf(campaign));
+            System.debug('C501_CS_SharedCode::PrintSalesforceStructure Campaign - ' + String.valueOf(campaign));
 
             for (CampaignMember campaignMember :[select Id, Name from CampaignMember WHERE CampaignId = :campaign.Id]) {
-                System.debug('***** C501_CS_SharedCode::PrintSalesforceStructure CampaignMember - ' + String.valueOf(campaignMember));
+                System.debug('C501_CS_SharedCode::PrintSalesforceStructure CampaignMember - ' + String.valueOf(campaignMember));
             }
         }
 */       
@@ -3052,7 +3191,7 @@ public with sharing class C501_CS_SharedCode {
         Database.insert(insertAffiliations, false);
     }
 
-    private static void UpdateContactSubscriptions(Set<Id> contactIds, List<Contact> contacts) {
+    private static List<Contact> UpdateContactSubscriptions(Set<Id> contactIds, List<Contact> contacts) {
 
         List<Campaign> campaigns = [
             SELECT Id, Name, ParentId, Parent.Name
@@ -3060,7 +3199,7 @@ public with sharing class C501_CS_SharedCode {
             WHERE RecordType.Name like 'Mailing List/Group' AND (Status = 'Planned' OR Status = 'In Progress')];
 
         if (campaigns.isEmpty()) {
-            return;
+            return contacts;
         }
 
         List<Id> campaignIds = new List<Id>();
@@ -3075,8 +3214,6 @@ public with sharing class C501_CS_SharedCode {
 
         Map<Id, String> contactSubscriptions = new Map<Id, String>();
         for (CampaignMember campaignMember :campaignMembers) {
-
-            System.debug('*****C501_CS_Shared_Code::CampaignMemberTriggerHelper CampaignMember Name: ' + campaignMember.Campaign.Name + ' Contact Id: ' + campaignMember.ContactId);
 
             String subscriptions = campaignMember.Campaign.Name;
             if (contactSubscriptions.containsKey(campaignMember.ContactId)) {
@@ -3097,5 +3234,7 @@ public with sharing class C501_CS_SharedCode {
                 contact.C501_CS_Created_By_Contact_Subscription__c = true;
             }
         }
+
+        return contacts;
     }
 }

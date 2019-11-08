@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Engagement_Id__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <externalId>false</externalId>
+        <label>Engagement Id</label>
+        <referenceTo>Campaign</referenceTo>
+        <relationshipLabel>Inquiries (Engagement Id)</relationshipLabel>
+        <relationshipName>Inquiries</relationshipName>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <type>Lookup</type>
+    </fields>
     <webLinks>
         <fullName>C501_CS_Auto_Convert</fullName>
         <availability>online</availability>
