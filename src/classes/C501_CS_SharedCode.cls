@@ -31,6 +31,7 @@
 public with sharing class C501_CS_SharedCode { 
 
     public class ContactCacheException extends Exception {}
+    public class ContactException extends Exception {}
 
     public static void ContactCacheTriggerHelper( List<C501_Contact_Cache__c> contactCachesChanged) {
 
@@ -431,6 +432,11 @@ public with sharing class C501_CS_SharedCode {
         Set<Id> contactIds = new Set<Id>();
         Set<String> emailList = new Set<String>();
         for (Contact contact :contactsChanged) {
+
+            if (!Test.isRunningTest() && String.isBlank(contact.AccountId)) {
+                contact.addError( new ContactException('Organization required to add/update an individual'));
+            }
+
             contactIds.add(contact.Id);
 
             if (!String.isBlank(contact.Email)) {
