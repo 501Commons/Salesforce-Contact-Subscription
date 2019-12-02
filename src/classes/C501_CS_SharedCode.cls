@@ -43,7 +43,7 @@ public with sharing class C501_CS_SharedCode {
 
             updatedContactCacheIds.add(contactCache.Id);
 
-            if (contactCache.Type__c == 'Personal') {
+            if (contactCache.Type__c == 'Personal' || contactCache.Type__c == 'Ignore All') {
                 emailsImported.add(contactCache.Email__c);
                 continue;
             }

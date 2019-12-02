@@ -319,6 +319,11 @@
                     <default>false</default>
                     <label>Ignore</label>
                 </value>
+                <value>
+                    <fullName>Ignore All</fullName>
+                    <default>false</default>
+                    <label>Ignore All</label>
+                </value>
             </valueSetDefinition>
         </valueSet>
     </fields>
