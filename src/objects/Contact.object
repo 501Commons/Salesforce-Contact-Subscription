@@ -218,6 +218,36 @@
         <type>Text</type>
         <unique>false</unique>
     </fields>
+    <listViews>
+        <fullName>My_Missing_Organizations</fullName>
+        <columns>FULL_NAME</columns>
+        <columns>CONTACT.EMAIL</columns>
+        <columns>CORE.USERS.ALIAS</columns>
+        <columns>CORE.USERS.FIRST_NAME</columns>
+        <columns>CORE.USERS.LAST_NAME</columns>
+        <filterScope>Mine</filterScope>
+        <filters>
+            <field>ACCOUNT.ACCOUNT_ID</field>
+            <operation>equals</operation>
+        </filters>
+        <label>My Missing Organizations</label>
+    </listViews>
+    <listViews>
+        <fullName>Pending_Subscription</fullName>
+        <columns>FULL_NAME</columns>
+        <columns>CONTACT.EMAIL</columns>
+        <columns>CORE.USERS.ALIAS</columns>
+        <columns>ACCOUNT.NAME</columns>
+        <columns>CORE.USERS.FIRST_NAME</columns>
+        <columns>CORE.USERS.LAST_NAME</columns>
+        <filterScope>Mine</filterScope>
+        <filters>
+            <field>C501_CS_Created_By_Contact_Subscription__c</field>
+            <operation>equals</operation>
+            <value>0</value>
+        </filters>
+        <label>My Missing Subscriptions</label>
+    </listViews>
     <webLinks>
         <fullName>C501_CS_Create</fullName>
         <availability>online</availability>

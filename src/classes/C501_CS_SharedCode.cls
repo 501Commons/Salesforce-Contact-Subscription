@@ -36,26 +36,34 @@ public with sharing class C501_CS_SharedCode {
 
         System.debug('C501_CS_SharedCode::ContactCacheTriggerHelper');
 
-        List<C501_Contact_Cache__c> insertContactCaches = new List<C501_Contact_Cache__c>();
+        List<C501_Contact_Cache__c> contactCachesImport = new List<C501_Contact_Cache__c>();
+        Set<String> emailsImported = new Set<String>();
+        Set<Id> updatedContactCacheIds = new Set<Id>();
         for (C501_Contact_Cache__c contactCache :contactCachesChanged) {
 
-            if (contactCache.Type__c <> 'Business') {
+            updatedContactCacheIds.add(contactCache.Id);
+
+            if (contactCache.Type__c == 'Personal') {
+                emailsImported.add(contactCache.Email__c);
                 continue;
             }
 
-            if (String.isBlank(contactCache.FirstName__c) || String.isBlank(contactCache.LastName__c) || String.isBlank(contactCache.Email__c) || String.isBlank(contactCache.Organization__c)) {
-                contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Organization'));
-                continue;
-            }
-            else {
-                insertContactCaches.add(contactCache);
+            if (contactCache.Type__c == 'Business') {
+
+                if (String.isBlank(contactCache.FirstName__c) || String.isBlank(contactCache.LastName__c) || String.isBlank(contactCache.Email__c) || String.isBlank(contactCache.Organization__c)) {
+                    contactCache.addError( new ContactCacheException('1 or more required fields missing; FirstName, LastName, Email, Organization'));
+                    continue;
+                }
+                else {
+                    contactCachesImport.add(contactCache);
+                }
             }
         }
 
-        if (!insertContactCaches.isEmpty()) {
+        if (!contactCachesImport.isEmpty()) {
 
             List<Contact> insertContacts = new List<Contact>();
-            for (C501_Contact_Cache__c contactCache :insertContactCaches) {
+            for (C501_Contact_Cache__c contactCache :contactCachesImport) {
                 insertContacts.add( new Contact(
                     AccountId = contactCache.Organization__c,
                     Email = contactCache.Email__c,
@@ -82,6 +90,12 @@ public with sharing class C501_CS_SharedCode {
                 System.debug('C501_CS_SharedCode::ContactCacheTriggerHelper insertContacts: ' + insertContacts);
                 insert insertContacts;
             }
+        }
+
+        // Delete related contact caches
+        List<C501_Contact_Cache__c> deleteContactCaches = [SELECT Id FROM C501_Contact_Cache__c WHERE (Not Id in :updatedContactCacheIds) AND Email__c in :emailsImported];
+        if (!deleteContactCaches.isEmpty()) {
+            delete deleteContactCaches;
         }
     }
 
@@ -415,14 +429,36 @@ public with sharing class C501_CS_SharedCode {
         System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ContactTriggerHelper size: ' + contactsChanged.size());
 
         Set<Id> contactIds = new Set<Id>();
+        Set<String> emailList = new Set<String>();
         for (Contact contact :contactsChanged) {
             contactIds.add(contact.Id);
+
+            if (!String.isBlank(contact.Email)) {
+                emailList.add(contact.Email);
+            }
+
+            if (!String.isBlank(contact.Alternate_Email__c)) {
+                emailList.add(contact.Alternate_Email__c);
+            }
+
+            if (!String.isBlank(contact.Personal_Email__c)) {
+                emailList.add(contact.Personal_Email__c);
+            }
         }
 
         C501_CS_SharedCode.CheckAffiliation(contactIds, contactsChanged);
 
         if (isInsert) {
             return;
+        }
+
+        // Check to remove related emails from contact cache
+        //
+        if (!emailList.isEmpty()) {
+            List<C501_Contact_Cache__c> deleteContactCache = [SELECT Id FROM C501_Contact_Cache__c WHERE Email__c in :emailList];
+            if (!deleteContactCache.isEmpty()) {
+                Database.delete(deleteContactCache, false);
+            }
         }
     }
 

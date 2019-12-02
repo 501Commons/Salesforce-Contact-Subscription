@@ -19,8 +19,8 @@
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <label>Contact Management</label>
     <navType>Standard</navType>
-    <tabs>standard-Contact</tabs>
     <tabs>C501_Contact_Cache__c</tabs>
+    <tabs>standard-Contact</tabs>
     <tabs>standard-Account</tabs>
     <tabs>standard-Lead</tabs>
     <tabs>standard-Campaign</tabs>

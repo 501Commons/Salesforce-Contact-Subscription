@@ -44,14 +44,14 @@
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
     <enableActivities>false</enableActivities>
-    <enableBulkApi>true</enableBulkApi>
+    <enableBulkApi>false</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
     <enableLicensing>false</enableLicensing>
     <enableReports>false</enableReports>
     <enableSearch>false</enableSearch>
-    <enableSharing>true</enableSharing>
-    <enableStreamingApi>true</enableStreamingApi>
+    <enableSharing>false</enableSharing>
+    <enableStreamingApi>false</enableStreamingApi>
     <fields>
         <fullName>Company_Name__c</fullName>
         <externalId>false</externalId>
@@ -66,10 +66,21 @@
         <fullName>Email__c</fullName>
         <externalId>false</externalId>
         <label>Email</label>
-        <required>false</required>
+        <required>true</required>
         <trackTrending>false</trackTrending>
         <type>Email</type>
         <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>External_Id__c</fullName>
+        <caseSensitive>false</caseSensitive>
+        <externalId>true</externalId>
+        <label>External Id</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>true</unique>
     </fields>
     <fields>
         <fullName>FirstName__c</fullName>
@@ -313,23 +324,38 @@
     </fields>
     <label>Contact Cache</label>
     <listViews>
-        <fullName>All</fullName>
+        <fullName>All_Pending_Actions</fullName>
+        <booleanFilter>(1 AND 2) OR 3</booleanFilter>
+        <columns>OWNER.FIRST_NAME</columns>
+        <columns>Type__c</columns>
+        <columns>Source__c</columns>
+        <columns>FirstName__c</columns>
+        <columns>LastName__c</columns>
+        <columns>Email__c</columns>
+        <columns>Organization__c</columns>
         <columns>NAME</columns>
         <filterScope>Everything</filterScope>
         <filters>
             <field>Source__c</field>
             <operation>equals</operation>
-            <value>Outlook Cache</value>
+            <value>Outlook Contact Change</value>
         </filters>
         <filters>
-            <field>FirstName__c</field>
+            <field>Type__c</field>
             <operation>equals</operation>
+            <value>Business</value>
         </filters>
-        <label>All</label>
+        <filters>
+            <field>Type__c</field>
+            <operation>equals</operation>
+            <value>Unassigned</value>
+        </filters>
+        <label>All Pending Actions</label>
     </listViews>
     <listViews>
         <fullName>Merge_Pending</fullName>
         <booleanFilter>(1 AND 2) OR 3</booleanFilter>
+        <columns>OWNER.FIRST_NAME</columns>
         <columns>Type__c</columns>
         <columns>Source__c</columns>
         <columns>FirstName__c</columns>
