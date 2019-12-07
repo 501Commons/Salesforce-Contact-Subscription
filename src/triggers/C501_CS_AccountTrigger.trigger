@@ -1,4 +1,4 @@
-trigger C501_CS_AccountTrigger on Account (before update, before insert) {
+trigger C501_CS_AccountTrigger on Account (before insert) {
 
     public class AccountException extends Exception {}
 
