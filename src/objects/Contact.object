@@ -198,16 +198,6 @@
         <unique>false</unique>
     </fields>
     <fields>
-        <fullName>C501_CS_Subscriptions__c</fullName>
-        <externalId>false</externalId>
-        <label>Subscriptions</label>
-        <length>32768</length>
-        <trackFeedHistory>false</trackFeedHistory>
-        <trackHistory>false</trackHistory>
-        <type>LongTextArea</type>
-        <visibleLines>3</visibleLines>
-    </fields>
-    <fields>
         <fullName>Dietary_Restrictions__c</fullName>
         <externalId>false</externalId>
         <label>Dietary Restrictions</label>
@@ -217,6 +207,15 @@
         <trackHistory>false</trackHistory>
         <type>Text</type>
         <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Has_Subscription__c</fullName>
+        <defaultValue>false</defaultValue>
+        <externalId>false</externalId>
+        <label>Has Subscription</label>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
     </fields>
     <listViews>
         <fullName>My_Missing_Organizations</fullName>
@@ -242,7 +241,7 @@
         <columns>CORE.USERS.LAST_NAME</columns>
         <filterScope>Mine</filterScope>
         <filters>
-            <field>C501_CS_Created_By_Contact_Subscription__c</field>
+            <field>Has_Subscription__c</field>
             <operation>equals</operation>
             <value>0</value>
         </filters>

@@ -425,13 +425,26 @@ public with sharing class C501_CS_SharedCode {
         }
     }
 
-    public static void ContactTriggerHelper( List<Contact> contactsChanged, Boolean isInsert) {
+    public static void ContactTriggerHelper(Map<Id, Contact> contactsChangeMap, List<Contact> contactsChanged, Boolean isInsert, Boolean isAfter) {
 
         System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::ContactTriggerHelper size: ' + contactsChanged.size());
+
+        Map<Id, Contact> contactsMap = new Map<Id, Contact>();
+        if (!isInsert && !isAfter) {
+            // Make sure Contact Subscriptions is up to date
+            contactsMap = C501_CS_SharedCode.UpdateContactSubscriptions(contactsChangeMap.deepClone());
+        }
 
         Set<Id> contactIds = new Set<Id>();
         Set<String> emailList = new Set<String>();
         for (Contact contact :contactsChanged) {
+
+            // Check to update has subscription
+            if (!isInsert && !isAfter) {
+                if (contactsMap.containsKey(contact.Id)) {
+                    contact.Has_Subscription__c = contactsMap.get(contact.Id).Has_Subscription__c;
+                }
+            }
 
             if (!Test.isRunningTest() && String.isBlank(contact.AccountId)) {
                 contact.addError( new ContactException('Organization required to add/update an individual'));
@@ -476,7 +489,6 @@ public with sharing class C501_CS_SharedCode {
 
         System.debug(LoggingLevel.DEBUG, 'C501_CS_SharedCode::CampaignMemberTriggerHelper size: ' + campaignMembersChanged.size());
 
-        Set<Id> contactIds = new Set<Id>();
         Map<Id, Contact> contactsMap = new Map<Id, Contact>();
         for (CampaignMember campaignMember :campaignMembersChanged) {
 
@@ -484,18 +496,22 @@ public with sharing class C501_CS_SharedCode {
                 continue;
             }
 
-            contactIds.add(campaignMember.ContactId);
             contactsMap.put(
                 campaignMember.ContactId,
-                new Contact( Id = campaignMember.ContactId));
+                new Contact(
+                    Id = campaignMember.ContactId,
+                    Has_Subscription__c = false));
         }
 
         // Make sure Contact Subscriptions is up to date
-        List<Contact> contacts = C501_CS_SharedCode.UpdateContactSubscriptions(contactIds, contactsMap.values());
+        contactsMap = C501_CS_SharedCode.UpdateContactSubscriptions(contactsMap);
 
-        if (!contacts.isEmpty()) {
-            update contacts;
+        if (!contactsMap.isEmpty()) {
+
+            // Ignore DML exceptions since could be called from a contact trigger without update permission
+            Database.update(contactsMap.values(), false);
         }
+
     }
 
     public static void TestSetup() {
@@ -3233,47 +3249,30 @@ public with sharing class C501_CS_SharedCode {
         Database.insert(insertAffiliations, false);
     }
 
-    private static List<Contact> UpdateContactSubscriptions(Set<Id> contactIds, List<Contact> contacts) {
+    private static Map<Id, Contact> UpdateContactSubscriptions(Map<Id, Contact> contacts) {
 
-        List<Campaign> campaigns = [
-            SELECT Id, Name, ParentId, Parent.Name
-            FROM Campaign
-            WHERE RecordType.Name like 'Mailing List/Group' AND (Status = 'Planned' OR Status = 'In Progress')];
-
-        if (campaigns.isEmpty()) {
+        if (contacts == null || contacts.isEmpty()) {
             return contacts;
         }
 
-        List<Id> campaignIds = new List<Id>();
-        for (Campaign campaign :campaigns) {
-            campaignIds.add(campaign.Id);
-        }
-
-        List<CampaignMember> campaignMembers = [
-            SELECT Id, ContactId, Campaign.Name
+        List<AggregateResult> campaignMemberCount = [
+            SELECT ContactId, Count(Id)
             FROM CampaignMember
-            WHERE ContactId in :contactIds AND CampaignId in :campaignIds];
+            WHERE Campaign.RecordType.Name like 'Mailing List/Group' AND ContactId in :contacts.keySet()
+            GROUP BY ContactId];
 
-        Map<Id, String> contactSubscriptions = new Map<Id, String>();
-        for (CampaignMember campaignMember :campaignMembers) {
+        for (AggregateResult result : campaignMemberCount) {
 
-            String subscriptions = campaignMember.Campaign.Name;
-            if (contactSubscriptions.containsKey(campaignMember.ContactId)) {
-                subscriptions = contactSubscriptions.remove(campaignMember.ContactId) + ',' + subscriptions;
-            }
-
-            contactSubscriptions.put(campaignMember.ContactId, subscriptions);
-        }
-
-        for (Contact contact :contacts) {
-
-            if (contactSubscriptions.containsKey(contact.Id)) {
-                contact.C501_CS_Subscriptions__c = contactSubscriptions.get(contact.Id);
-                contact.C501_CS_Created_By_Contact_Subscription__c = true;
+            Id contactId = (Id)result.get('ContactId');
+            if (contacts.containsKey(contactId)) {
+                Contact updateContact = contacts.remove(contactId);
+                updateContact.Has_Subscription__c = true;
+                contacts.put(contactId, updateContact);
             }
             else {
-                contact.C501_CS_Subscriptions__c = '';
-                contact.C501_CS_Created_By_Contact_Subscription__c = true;
+                contacts.put(contactId, new Contact(
+                    Id = contactId,
+                    Has_Subscription__c = true));
             }
         }
 
