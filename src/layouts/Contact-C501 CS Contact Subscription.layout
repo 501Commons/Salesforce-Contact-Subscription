@@ -327,13 +327,6 @@
         <relatedList>RelatedEntityHistoryList</relatedList>
     </relatedLists>
     <relatedLists>
-        <fields>CREATED_DATE</fields>
-        <fields>c501mm__Field__c</fields>
-        <fields>c501mm__Merge_Value__c</fields>
-        <fields>c501mm__Ignore_Value__c</fields>
-        <relatedList>c501mm__C501_Merge_Contact_History__c.c501mm__Contact__c</relatedList>
-    </relatedLists>
-    <relatedLists>
         <fields>CAMPAIGN.NAME</fields>
         <fields>CAMPAIGN.START_DATE</fields>
         <fields>CAMPAIGN.CAMPAIGN_TYPE</fields>

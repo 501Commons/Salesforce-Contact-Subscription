@@ -66,6 +66,7 @@
         <members>Contact.C501_CS_Created_By_Contact_Subscription__c</members>
         <members>Contact.C501_CS_Group__c</members>
         <members>Contact.C501_CS_Sub_Group__c</members>
+        <members>Contact.C501_Case_Safe_Contact_ID__c</members>
         <members>Contact.Dietary_Restrictions__c</members>
         <members>Contact.Has_Subscription__c</members>
         <members>Lead.Engagement_Id__c</members>
@@ -95,6 +96,15 @@
         <name>CustomObject</name>
     </types>
     <types>
+        <members>C501_Contact_Cache__c</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>ContactManagement</members>
+        <members>ContactManagement/MxCGSqfaVwAgGPCqHCpNSlEhljuwEE</members>
+        <name>Dashboard</name>
+    </types>
+    <types>
         <members>Contact.C501_CS_Address_Information</members>
         <members>Contact.C501_CS_Assistant_Information</members>
         <members>Contact.C501_CS_Description_Information</members>
@@ -119,6 +129,18 @@
         <name>ListView</name>
     </types>
     <types>
+        <members>ContactManagement</members>
+        <members>ContactManagement/All_Cache_Contacts_Pending_Action_RKC</members>
+        <members>ContactManagement/All_Contacts_Missing_Subscription</members>
+        <members>ContactManagement/New_Contacts_Only_Report_aPW</members>
+        <name>Report</name>
+    </types>
+    <types>
+        <members>Contact_Cache</members>
+        <members>Contacts_Only</members>
+        <name>ReportType</name>
+    </types>
+    <types>
         <members>Bootstrap</members>
         <members>Bootstrap4Force</members>
         <members>FullCalendar</members>
@@ -132,12 +154,9 @@
         <name>StaticResource</name>
     </types>
     <types>
-        <members>Lead.C501_CS_Auto_Convert</members>
-        <name>WebLink</name>
-    </types>
-    <types>
         <members>Contact.C501_CS_Create</members>
         <members>Contact.C501_CS_Update</members>
+        <members>Lead.C501_CS_Auto_Convert</members>
         <name>WebLink</name>
     </types>
     <version>45.0</version>

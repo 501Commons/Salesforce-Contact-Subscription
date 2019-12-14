@@ -511,7 +511,6 @@ public with sharing class C501_CS_SharedCode {
             // Ignore DML exceptions since could be called from a contact trigger without update permission
             Database.update(contactsMap.values(), false);
         }
-
     }
 
     public static void TestSetup() {
