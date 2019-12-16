@@ -4,8 +4,6 @@
         <members>C501_CS_Lead_ListView_Controller</members>
         <members>C501_CS_Lead_ListView_Controller_TEST</members>
         <members>C501_CS_SharedCode</members>
-        <members>C501_CS_ListView_Controller</members>
-        <members>C501_CS_ListView_Controller_TEST</members>        
         <members>C501_CS_UTIL_PageMessages_CTRL</members>
         <members>C501_CTRL_ContactSubscription</members>
         <members>C501_CTRL_ContactSubscription_TEST</members>
