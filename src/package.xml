@@ -3,9 +3,9 @@
     <types>
         <members>C501_CS_Lead_ListView_Controller</members>
         <members>C501_CS_Lead_ListView_Controller_TEST</members>
-        <members>C501_CS_ListView_Controller</members>
-        <members>C501_CS_ListView_Controller_TEST</members>
         <members>C501_CS_SharedCode</members>
+        <members>C501_CS_ListView_Controller</members>
+        <members>C501_CS_ListView_Controller_TEST</members>        
         <members>C501_CS_UTIL_PageMessages_CTRL</members>
         <members>C501_CTRL_ContactSubscription</members>
         <members>C501_CTRL_ContactSubscription_TEST</members>
@@ -19,7 +19,6 @@
     <types>
         <members>C501_CS_Lead_ListView</members>
         <members>C501_ContactSubscription</members>
-        <members>C501_CreateContact_ListView</members>
         <name>ApexPage</name>
     </types>
     <types>
@@ -117,6 +116,11 @@
         <name>FlexiPage</name>
     </types>
     <types>
+        <members>Contact_ListView_Subscribe</members>
+        <members>Contact_ListView_Subscribe_Members</members>
+        <name>Flow</name>
+    </types>
+    <types>
         <members>Contact-C501 CS Contact Subscription</members>
         <name>Layout</name>
     </types>
@@ -127,6 +131,10 @@
         <members>Contact.My_Missing_Organizations</members>
         <members>Contact.Pending_Subscription</members>
         <name>ListView</name>
+    </types>
+    <types>
+        <members>Contact_Management</members>
+        <name>PermissionSet</name>
     </types>
     <types>
         <members>ContactManagement</members>
@@ -154,8 +162,6 @@
         <name>StaticResource</name>
     </types>
     <types>
-        <members>Contact.C501_CS_Create</members>
-        <members>Contact.C501_CS_Update</members>
         <members>Lead.C501_CS_Auto_Convert</members>
         <name>WebLink</name>
     </types>

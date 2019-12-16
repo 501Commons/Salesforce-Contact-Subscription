@@ -259,27 +259,4 @@
         </filters>
         <label>My Missing Subscriptions</label>
     </listViews>
-    <webLinks>
-        <fullName>C501_CS_Create</fullName>
-        <availability>online</availability>
-        <displayType>massActionButton</displayType>
-        <height>600</height>
-        <linkType>page</linkType>
-        <masterLabel>Create</masterLabel>
-        <openType>sidebar</openType>
-        <page>C501_CreateContact_ListView</page>
-        <protected>false</protected>
-        <requireRowSelection>true</requireRowSelection>
-    </webLinks>
-    <webLinks>
-        <fullName>C501_CS_Update</fullName>
-        <availability>online</availability>
-        <displayType>button</displayType>
-        <height>600</height>
-        <linkType>page</linkType>
-        <masterLabel>Update</masterLabel>
-        <openType>sidebar</openType>
-        <page>C501_ContactSubscription</page>
-        <protected>false</protected>
-    </webLinks>
 </CustomObject>
