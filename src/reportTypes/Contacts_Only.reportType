@@ -403,16 +403,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>C501_CS_Group__c</field>
-            <table>Contact</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>C501_CS_Sub_Group__c</field>
-            <table>Contact</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>Dietary_Restrictions__c</field>
             <table>Contact</table>
         </columns>

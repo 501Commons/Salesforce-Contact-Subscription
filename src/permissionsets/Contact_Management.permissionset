@@ -155,6 +155,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Campaign.C501_CS_Subscription_Hierarchy__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Campaign.C501_CS_Subscription__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -171,6 +176,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Contact.C501_CS_Sub_Group__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Contact.C501_CS_Sub_Sub_Group__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>

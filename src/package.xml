@@ -59,10 +59,12 @@
         <members>C501_Contact_Cache__c.Title__c</members>
         <members>C501_Contact_Cache__c.Type__c</members>
         <members>Campaign.C501_CS_Remove__c</members>
+        <members>Campaign.C501_CS_Subscription_Hierarchy__c</members>
         <members>Campaign.C501_CS_Subscription__c</members>
         <members>Contact.C501_CS_Created_By_Contact_Subscription__c</members>
         <members>Contact.C501_CS_Group__c</members>
         <members>Contact.C501_CS_Sub_Group__c</members>
+        <members>Contact.C501_CS_Sub_Sub_Group__c</members>
         <members>Contact.C501_Case_Safe_Contact_ID__c</members>
         <members>Contact.Dietary_Restrictions__c</members>
         <members>Contact.Has_Subscription__c</members>

@@ -198,6 +198,17 @@
         <unique>false</unique>
     </fields>
     <fields>
+        <fullName>C501_CS_Sub_Sub_Group__c</fullName>
+        <externalId>false</externalId>
+        <label>Sub Sub Group</label>
+        <length>80</length>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>C501_Case_Safe_Contact_ID__c</fullName>
         <description>18 digits</description>
         <externalId>false</externalId>

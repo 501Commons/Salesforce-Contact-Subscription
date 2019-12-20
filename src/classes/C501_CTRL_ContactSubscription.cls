@@ -90,6 +90,9 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
         if (!listStrFields.contains('C501_CS_Sub_Group__c')) {
             listStrFields.add('C501_CS_Sub_Group__c');
         }
+        if (!listStrFields.contains('C501_CS_Sub_Sub_Group__c')) {
+            listStrFields.add('C501_CS_Sub_Sub_Group__c');
+        }
 
         this.contactRecord = (Contact)controller.getRecord();
 
@@ -253,6 +256,18 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
         set;
     }
 
+    public List<SelectOption> listSubSubGroups {
+        get {
+
+            if (listSubSubGroups == null )
+                listSubSubGroups = this.ListSubSubGroups(contactRecord.C501_CS_Sub_Group__c);
+
+            return listSubSubGroups;
+        }
+
+        set;
+    }
+
     // The list of contact subscriptions.
     public List<Campaign> listContactSubscriptions {
         get {
@@ -294,7 +309,28 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
             return null;
         }
 
-        System.debug('C501_CTRL_ContactSubscription::ListGroups groupFilter: ' + groupFilter);
+        System.debug('C501_CTRL_ContactSubscription::ListSubGroups groupFilter: ' + groupFilter);
+
+        for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE RecordType.Name = 'Mailing List/Group' AND Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
+            listGroup.add(new SelectOption(
+                campaignRecord.Id,
+                campaignRecord.Name));
+        }
+
+        return listGroup;
+    }
+
+    public List<SelectOption> ListSubSubGroups(String groupFilter) {
+
+        Set<String> setGroupUnique = new Set<String>();
+        List<SelectOption> listGroup = new List<SelectOption>();
+        listGroup.add(new SelectOption('', ''));
+
+        if (String.isBlank(groupFilter)) {
+            return listGroup;
+        }
+
+        System.debug('C501_CTRL_ContactSubscription::ListSubSubGroups groupFilter: ' + groupFilter);
 
         for (Campaign campaignRecord :[SELECT Id, Name FROM Campaign WHERE RecordType.Name = 'Mailing List/Group' AND Parent.Id = :groupFilter AND (Status = 'Planned' OR Status = 'In Progress') ORDER BY Name ASC]) {
             listGroup.add(new SelectOption(
@@ -323,14 +359,14 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
         System.debug('C501_CTRL_ContactSubscription::FillContactSubscriptions subscribedCampaignIds: ' + subscribedCampaignIds + ' listContactSubscriptionRequests: ' + listContactSubscriptionRequests);
 
         // Add Active Subscriptions
-        String strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND Id in :subscribedCampaignIds';
+        String strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, C501_CS_Subscription_Hierarchy__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND Id in :subscribedCampaignIds ORDER BY C501_CS_Subscription_Hierarchy__c ASC';
         for (Campaign campaignRecord :Database.Query(strSoql)) {
             campaignRecord.C501_CS_Subscription__c = 'Active';
             listContactSubscriptions.add(campaignRecord);
         }
 
         // Add Requested Subscriptions
-        strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND (NOT Id in :subscribedCampaignIds) AND Id in :listContactSubscriptionRequests';
+        strSoql = 'SELECT C501_CS_Remove__c, C501_CS_Subscription__c, C501_CS_Subscription_Hierarchy__c, Name, Parent.Name FROM Campaign WHERE RecordType.Name = \'Mailing List/Group\' AND (NOT Id in :subscribedCampaignIds) AND Id in :listContactSubscriptionRequests ORDER BY C501_CS_Subscription_Hierarchy__c ASC';
         for (Campaign campaignRecord :Database.Query(strSoql)) {
             campaignRecord.C501_CS_Subscription__c = 'Requested';
             listContactSubscriptions.add(campaignRecord);
@@ -341,7 +377,19 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
     public virtual PageReference ChangeGroup() {
 
         contactRecord.C501_CS_Sub_Group__c = '';
+        contactRecord.C501_CS_Sub_Sub_Group__c = '';
         listSubGroups = null;
+        listSubSubGroups = null;
+        strSaveResults = null;
+
+        return null;
+    }
+
+    // the user has changed the Group dropdown
+    public virtual PageReference ChangeSubGroup() {
+
+        contactRecord.C501_CS_Sub_Sub_Group__c = '';
+        listSubSubGroups = null;
         strSaveResults = null;
 
         return null;
@@ -395,6 +443,7 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
 
         Campaign groupCampaign;
         Campaign subGroupCampaign;
+        Campaign subSubGroupCampaign;
 
         List<Campaign> campaigns = [SELECT Id, Name, Parent.Name from Campaign];
         for (Campaign campaignRecord :campaigns) {
@@ -412,6 +461,13 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
                     subGroupCampaign = campaignRecord;
                 }
             }
+
+            // Check for Sub Sub Group Match
+            if (!String.isBlank(contactRecord.C501_CS_Sub_Sub_Group__c)) {
+                if (campaignRecord.Id == contactRecord.C501_CS_Sub_Sub_Group__c) {
+                    subSubGroupCampaign = campaignRecord;
+                }
+            }
         }
 
         if (groupCampaign == null || groupCampaign.Id == null) {
@@ -422,26 +478,41 @@ public virtual with sharing class C501_CTRL_ContactSubscription {
         if (listContactSubscriptions != null) {
             for (Campaign subscription :listContactSubscriptions) {
 
-                if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c)) {
+                if (!String.isBlank(contactRecord.C501_CS_Sub_Sub_Group__c)) {
+                    if (subscription.Id.equals(contactRecord.C501_CS_Sub_Sub_Group__c)) {
+                        System.debug('C501_CTRL_ContactSubscription::AddSubscription - Sub Sub Group: ' + contactRecord.C501_CS_Sub_Sub_Group__c + ' already subscribed');
+                        return null;
+                    }
+                }
+                else if (!String.isBlank(contactRecord.C501_CS_Sub_Group__c)) {
                     if (subscription.Id.equals(contactRecord.C501_CS_Sub_Group__c)) {
                         System.debug('C501_CTRL_ContactSubscription::AddSubscription - Sub Group: ' + contactRecord.C501_CS_Sub_Group__c + ' already subscribed');
                         return null;
                     }
-                } else if (subscription.Id.equals(contactRecord.C501_CS_Group__c)) {
+                }
+                else if (subscription.Id.equals(contactRecord.C501_CS_Group__c)) {
                     System.debug('C501_CTRL_ContactSubscription::AddSubscription - Group: ' + contactRecord.C501_CS_Group__c + ' already subscribed');
                     return null;
                 }
             }
         }
 
-        // Add subscription request
-        if (subGroupCampaign == null || subGroupCampaign.Id == null) {
-            System.debug('C501_CTRL_ContactSubscription::AddSubscription - Add Group: ' + groupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
-            listContactSubscriptionRequests.add(groupCampaign.Id);
+        // Check to add Sub Sub Group subscription request
+        if (subSubGroupCampaign <> null && subSubGroupCampaign.Id <> null) {
+            System.debug('C501_CTRL_ContactSubscription::AddSubscription - Add Sub Sub Group: ' + subSubGroupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
+            listContactSubscriptionRequests.add(subSubGroupCampaign.Id);
         }
-        else {
+
+        // Check to add Sub Group subscription request
+        if (subGroupCampaign <> null && subGroupCampaign.Id <> null) {
             System.debug('C501_CTRL_ContactSubscription::AddSubscription - Add Sub Group: ' + subGroupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
             listContactSubscriptionRequests.add(subGroupCampaign.Id);
+        }
+
+        // Check to add Group subscription request
+        if (groupCampaign <> null && groupCampaign.Id <> null) {
+            System.debug('C501_CTRL_ContactSubscription::AddSubscription - Add Group: ' + groupCampaign.Id + ' into list: ' + listContactSubscriptionRequests);
+            listContactSubscriptionRequests.add(groupCampaign.Id);
         }
 
         // Clear out list so will get rebuilt

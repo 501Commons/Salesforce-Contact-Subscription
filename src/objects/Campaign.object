@@ -8,6 +8,16 @@
         <type>Checkbox</type>
     </fields>
     <fields>
+        <fullName>C501_CS_Subscription_Hierarchy__c</fullName>
+        <externalId>false</externalId>
+        <formula>IF(ISBLANK(Parent.Parent.Name), &quot;&quot;, Parent.Parent.Name + &quot;  --&gt;&gt;  &quot;) + IF(ISBLANK(Parent.Name), &quot;&quot;, Parent.Name + &quot;  --&gt;&gt;  &quot;) + Name</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Subscription Hierarchy</label>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
         <fullName>C501_CS_Subscription__c</fullName>
         <externalId>false</externalId>
         <label>Subscription</label>
@@ -32,6 +42,7 @@
     </fields>
     <listViews>
         <fullName>Contact_Subscriptions</fullName>
+        <columns>C501_CS_Subscription_Hierarchy__c</columns>
         <columns>PARENT_NAME</columns>
         <columns>CAMPAIGN.NAME</columns>
         <columns>CAMPAIGN.ACTIVE</columns>

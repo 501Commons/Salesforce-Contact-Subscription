@@ -118,6 +118,12 @@
                             </apex:column> 
                 
                             <apex:column styleClass="myTD reference" >
+                                <apex:facet name="header">Subscription Hierarchy</apex:facet>
+                                <apex:outputField value="{!ContactSubscription.C501_CS_Subscription_Hierarchy__c}" styleClass="text" >
+                                </apex:outputField>
+                            </apex:column> 
+
+                            <apex:column styleClass="myTD reference" >
                                 <apex:facet name="header">Subscription</apex:facet>
                                 <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
                                 </apex:outputField>
@@ -132,14 +138,19 @@
                         </apex:dataTable>
 
                         <apex:actionRegion >
-                            <apex:outputLabel value="Group" for="ddlGroups"/>
+                            <apex:outputLabel value="Group (Level 1)" for="ddlGroups"/>
                             <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
-                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups,ddlSubSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
                                 <apex:selectOptions value="{!listGroups}" /> 
                             </apex:selectList>
-                            <apex:outputLabel value="Sub Group" for="ddlSubGroups"/>
+                            <apex:outputLabel value="Group (Level 2)" for="ddlSubGroups"/>
                             <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubSubGroups" status="retrieveStatus" action="{!ChangeSubGroup}" />
                                 <apex:selectOptions value="{!listSubGroups}" /> 
+                            </apex:selectList>
+                            <apex:outputLabel value="Group (Level 3)" for="ddlSubSubGroups"/>
+                            <apex:selectList id="ddlSubSubGroups" value="{!contactRecord.C501_CS_Sub_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubSubGroups.size=1}">
+                                <apex:selectOptions value="{!listSubSubGroups}" /> 
                             </apex:selectList>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSaveFooter" immediate="false" reRender="vfform,tblContactSubscriptions"/>
@@ -207,7 +218,13 @@
                                 <apex:outputField value="{!ContactSubscription.C501_CS_Subscription__c}" styleClass="text" >
                                 </apex:outputField>
                             </apex:column> 
-                
+
+                            <apex:column styleClass="myTD reference" >
+                                <apex:facet name="header">Subscription Hierarchy</apex:facet>
+                                <apex:outputField value="{!ContactSubscription.C501_CS_Subscription_Hierarchy__c}" styleClass="text" >
+                                </apex:outputField>
+                            </apex:column> 
+                            
                             <apex:column styleClass="myTD reference" >
                                 <apex:facet name="header">Subscription</apex:facet>
                                 <apex:outputField value="{!ContactSubscription.Name}" styleClass="text" >
@@ -223,14 +240,19 @@
                         </apex:dataTable>
         
                         <apex:actionRegion >
-                            <apex:outputLabel value="Group" for="ddlGroups"/>
+                            <apex:outputLabel value="Group (Level 1)" for="ddlGroups"/>
                             <apex:selectList id="ddlGroups" value="{!contactRecord.C501_CS_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listGroups.size=1}">
-                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubGroups,ddlSubSubGroups" status="retrieveStatus" action="{!ChangeGroup}" />
                                 <apex:selectOptions value="{!listGroups}" /> 
                             </apex:selectList>
-                            <apex:outputLabel value="Sub Group" for="ddlSubGroups"/>
+                            <apex:outputLabel value="Group (Level 2)" for="ddlSubGroups"/>
                             <apex:selectList id="ddlSubGroups" value="{!contactRecord.C501_CS_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubGroups.size=1}">
+                                <apex:actionSupport immediate="false" event="onchange" rerender="ddlSubSubGroups" status="retrieveStatus" action="{!ChangeSubGroup}" />
                                 <apex:selectOptions value="{!listSubGroups}" /> 
+                            </apex:selectList>
+                            <apex:outputLabel value="Group (Level 3)" for="ddlSubSubGroups"/>
+                            <apex:selectList id="ddlSubSubGroups" value="{!contactRecord.C501_CS_Sub_Sub_Group__c}" required="false" size="1" styleClass="slds-select" disabled="{!listSubSubGroups.size=1}">
+                                <apex:selectOptions value="{!listSubSubGroups}" /> 
                             </apex:selectList>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSaveFooter" immediate="false" reRender="vfform,tblContactSubscriptions"/>
