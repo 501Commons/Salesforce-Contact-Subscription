@@ -128,6 +128,8 @@
         <members>C501_Contact_Cache__c.All_Pending_Actions</members>
         <members>C501_Contact_Cache__c.Merge_Pending</members>
         <members>Campaign.Contact_Subscriptions</members>
+        <members>Campaign.Contact_Subscriptions_Hierarchy_Custom</members>
+        <members>Campaign.Contact_Subscriptions_Level_1</members>
         <members>Contact.My_Missing_Organizations</members>
         <members>Contact.Pending_Subscription</members>
         <name>ListView</name>
