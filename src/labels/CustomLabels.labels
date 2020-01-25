@@ -94,7 +94,7 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>help text for the Contact Subscription page</shortDescription>
-        <value>Update contact fields and manage contact subscriptions.  Update all data as appropriate, and then click Save.</value>
+        <value>Subscribe or Remove individual subscriptions then click Save.</value>
     </labels>
     <labels>
         <fullName>CS_labelContactSubscriptionSaveSuccess</fullName>
@@ -110,6 +110,6 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>title for the Contact Subscription page</shortDescription>
-        <value>Contact Subscription</value>
+        <value>Individual Subscriptions</value>
     </labels>
 </CustomLabels>

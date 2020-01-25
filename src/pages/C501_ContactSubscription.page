@@ -33,6 +33,13 @@
     <apex:stylesheet value="{!URLFOR($Resource.v4sStaticResources, '/v4s_slds/v4s-common.css')}" />
 
     <style>
+
+        body{ background-color:white;  }
+
+        .THIS {
+            background-color: white;
+        }
+
         .myTD span.dateFormat {
             display: none !important;
         }
@@ -73,14 +80,7 @@
                     <div class="slds-col--padded">
                         <h1 class="slds-page-header__title slds-m-right--small slds-truncate slds-align-middle">{!$Label.CS_labelContactSubscriptionTitle}</h1>
                     </div>        
-    
-                    <div class="slds-col--padded slds-no-flex slds-align-middle">
-                        <div class="slds-button-group" role="group">
-                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!Cancel}" value="{!IF(ISNULL(strSaveResults), $Label.CS_labelButtonCancel, $Label.CS_labelButtonClose)}" immediate="true" reRender="vfform"/> 
-                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSave" immediate="false" reRender="vfform,tblContactSubscriptions"/>
-                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!SaveAndCloseContact}" value="{!$Label.CS_labelButtonSaveAndClose}" id="btnSaveClose" immediate="false" reRender="vfform"/>
-                        </div>
-                    </div>
+   
                 </div>
             </div>
             <!-- /PAGE HEADER -->
@@ -88,16 +88,9 @@
             <p class="slds-p-around--medium"><apex:outputText value="{!$Label.CS_labelContactSubscriptionHelp}" style="font-style:italic" /></p>
 
             <!-- Default Page Blcok -->
-            <apex:pageBlock title="Contact Fields" rendered="{!$User.UITheme <> 'Theme4t'}">
+            <apex:pageBlock rendered="{!$User.UITheme <> 'Theme4t'}">
 
-                    <apex:pageBlockSection title="Standard" columns="2">
-                        <apex:repeat value="{!StandardFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Subscriptions" columns="1">
+                    <apex:pageBlockSection columns="1">
                         <apex:dataTable value="{!listContactSubscriptions}" var="ContactSubscription" id="tblContactSubscriptions" 
                                         styleClass="slds-table slds-table--compact slds-table--bordered"
                                         headerClass="slds-text-heading--label slds-theme--shade" style="width:100%" >                 
@@ -154,52 +147,16 @@
                             </apex:selectList>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!AddSubscription}" value="{!$Label.CS_labelButtonSubscribe}" id="btnAddSubscription" immediate="false" reRender="tblContactSubscriptions"/>
                             <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSaveFooter" immediate="false" reRender="vfform,tblContactSubscriptions"/>
-                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!RefreshSubscriptions}" value="{!$Label.CS_labelButtonRefresh}" id="btnRefresh" immediate="false" reRender="tblContactSubscriptions"/>
                         </apex:actionRegion>
        
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Phone Contact" columns="2">
-                        <apex:repeat value="{!PhoneContactFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Assistant" columns="2">
-                        <apex:repeat value="{!AssistantFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Address" columns="2">
-                        <apex:repeat value="{!AddressFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Description" columns="2">
-                        <apex:repeat value="{!DescriptionFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-                   
             </apex:pageBlock>
 
             <!-- Mobile pageBlock -->
-            <apex:pageBlock title="Contact Fields" rendered="{!$User.UITheme == 'Theme4t'}">
+            <apex:pageBlock rendered="{!$User.UITheme == 'Theme4t'}">
 
-                    <apex:pageBlockSection title="Standard" columns="1">
-                        <apex:repeat value="{!StandardFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Subscriptions" columns="1">
+                    <apex:pageBlockSection columns="1">
                         <apex:dataTable value="{!listContactSubscriptions}" var="ContactSubscription" id="tblContactSubscriptions" 
                                         styleClass="slds-table slds-table--compact slds-table--bordered"
                                         headerClass="slds-text-heading--label slds-theme--shade" style="width:100%" >                 
@@ -261,34 +218,6 @@
 
                     </apex:pageBlockSection>
 
-                    <apex:pageBlockSection title="Phone Contact" columns="1">
-                        <apex:repeat value="{!PhoneContactFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Assistant" columns="1">
-                        <apex:repeat value="{!AssistantFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Address" columns="1">
-                        <apex:repeat value="{!AddressFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
-                    <apex:pageBlockSection title="Description" columns="1">
-                        <apex:repeat value="{!DescriptionFields}" var="f">
-                                <apex:inputField value="{!contactRecord[f.fieldPath]}" 
-                                    required="{!OR(f.required, f.dbrequired)}"/>
-                        </apex:repeat>
-                    </apex:pageBlockSection>
-
             </apex:pageBlock>
 
             <script type="text/javascript">
@@ -308,21 +237,6 @@
                 }
                 fixSearchIMG();
             </script>
-            &nbsp;&nbsp;&nbsp;&nbsp;
-
-            <!-- PAGE FOOTER -->
-            <div class="slds-page-header" role="banner">
-                <div class="slds-grid">
-                    <div class="slds-col--padded slds-no-flex slds-align-middle">
-                        <div class="slds-button-group" role="group">
-                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!Cancel}" value="{!IF(ISNULL(strSaveResults), $Label.CS_labelButtonCancel, $Label.CS_labelButtonClose)}" immediate="true" reRender="vfform"/> 
-                            <apex:commandButton styleClass="slds-button slds-button--brand" action="{!SaveContact}" value="{!$Label.CS_labelButtonSave}" id="btnSaveFooter" immediate="false" reRender="vfform,tblContactSubscriptions"/>
-                            <apex:commandButton styleClass="slds-button slds-button--neutral" action="{!SaveAndCloseContact}" value="{!$Label.CS_labelButtonSaveAndClose}" id="btnSaveCloseFooter" immediate="false" reRender="vfform"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- /PAGE FOOTER -->
 
         </div> <!-- slds -->    
     </apex:form>
