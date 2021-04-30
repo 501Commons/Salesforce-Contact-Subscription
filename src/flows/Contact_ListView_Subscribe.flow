@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <assignments>
+        <name>Add_Id_to_Ids</name>
+        <label>Add Id to Ids</label>
+        <locationX>178</locationX>
+        <locationY>43</locationY>
+        <assignmentItems>
+            <assignToReference>ids</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>id</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Screen_Select_Parent</targetReference>
+        </connector>
+    </assignments>
     <decisions>
         <name>Check_Subscriptions_Level2</name>
         <label>Check Subscriptions Level2</label>
-        <locationX>742</locationX>
+        <locationX>965</locationX>
         <locationY>227</locationY>
         <defaultConnector>
             <targetReference>Create_Members</targetReference>
@@ -28,7 +44,7 @@
     <decisions>
         <name>Check_Subscriptions_Level3</name>
         <label>Check Subscriptions Level3</label>
-        <locationX>743</locationX>
+        <locationX>966</locationX>
         <locationY>558</locationY>
         <defaultConnector>
             <targetReference>Create_Members</targetReference>
@@ -46,6 +62,28 @@
             </conditions>
             <connector>
                 <targetReference>Screen_Select_Parent_Child_Child</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Valid_Id</name>
+        <label>Valid Id</label>
+        <locationX>171</locationX>
+        <locationY>241</locationY>
+        <defaultConnector>
+            <targetReference>Screen_Select_Parent</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Valid_Id</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>id</leftValueReference>
+                <operator>NotEqualTo</operator>
+            </conditions>
+            <connector>
+                <targetReference>Add_Id_to_Ids</targetReference>
             </connector>
             <label>Yes</label>
         </rules>
@@ -107,7 +145,7 @@
         <valueField>Id</valueField>
     </dynamicChoiceSets>
     <interviewLabel>Contact ListView Subscribe {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Contact ListView Subscribe</label>
+    <label>Add Individual Subscriptions</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -124,7 +162,7 @@
     <recordCreates>
         <name>Create_Members</name>
         <label>Create Members</label>
-        <locationX>1159</locationX>
+        <locationX>1382</locationX>
         <locationY>689</locationY>
         <connector>
             <targetReference>Screen_Finished</targetReference>
@@ -134,7 +172,7 @@
     <recordLookups>
         <name>Lookup_Subscriptions_Level2</name>
         <label>Lookup Subscriptions Level2</label>
-        <locationX>750</locationX>
+        <locationX>973</locationX>
         <locationY>47</locationY>
         <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -156,7 +194,7 @@
     <recordLookups>
         <name>Lookup_Subscriptions_Level3</name>
         <label>Lookup Subscriptions Level3</label>
-        <locationX>749</locationX>
+        <locationX>972</locationX>
         <locationY>389</locationY>
         <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -178,7 +216,7 @@
     <screens>
         <name>Screen_Finished</name>
         <label>Subscription Management</label>
-        <locationX>1305</locationX>
+        <locationX>1528</locationX>
         <locationY>694</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
@@ -194,7 +232,7 @@
     <screens>
         <name>Screen_Select_Parent</name>
         <label>Subscription Management</label>
-        <locationX>211</locationX>
+        <locationX>434</locationX>
         <locationY>51</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
@@ -216,7 +254,7 @@
     <screens>
         <name>Screen_Select_Parent_Child</name>
         <label>Subscription Management (Level 2)</label>
-        <locationX>206</locationX>
+        <locationX>429</locationX>
         <locationY>230</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
@@ -239,7 +277,7 @@
     <screens>
         <name>Screen_Select_Parent_Child_Child</name>
         <label>Subscription Management (Level 3)</label>
-        <locationX>211</locationX>
+        <locationX>434</locationX>
         <locationY>563</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
@@ -259,12 +297,12 @@
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
-    <startElementReference>Screen_Select_Parent</startElementReference>
+    <startElementReference>Valid_Id</startElementReference>
     <status>Active</status>
     <subflows>
         <name>Get_Subscriptions_Level1</name>
         <label>Get Subscriptions</label>
-        <locationX>483</locationX>
+        <locationX>706</locationX>
         <locationY>52</locationY>
         <connector>
             <targetReference>Lookup_Subscriptions_Level2</targetReference>
@@ -306,7 +344,7 @@
     <subflows>
         <name>Get_Subscriptions_Level2</name>
         <label>Get Subscriptions</label>
-        <locationX>482</locationX>
+        <locationX>705</locationX>
         <locationY>373</locationY>
         <connector>
             <targetReference>Lookup_Subscriptions_Level3</targetReference>
@@ -348,7 +386,7 @@
     <subflows>
         <name>Get_Subscriptions_Level3</name>
         <label>Get Subscriptions</label>
-        <locationX>499</locationX>
+        <locationX>722</locationX>
         <locationY>694</locationY>
         <connector>
             <targetReference>Create_Members</targetReference>
@@ -394,6 +432,13 @@
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <objectType>CampaignMember</objectType>
+    </variables>
+    <variables>
+        <name>id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
     </variables>
     <variables>
         <name>ids</name>

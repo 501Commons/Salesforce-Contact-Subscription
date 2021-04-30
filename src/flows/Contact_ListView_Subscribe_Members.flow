@@ -108,17 +108,17 @@
             <targetReference>Existing_Member</targetReference>
         </connector>
         <filters>
-            <field>CampaignId</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>varInputCampaignId</elementReference>
-            </value>
-        </filters>
-        <filters>
             <field>ContactId</field>
             <operator>EqualTo</operator>
             <value>
                 <elementReference>selectedId</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>CampaignId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>varInputCampaignId</elementReference>
             </value>
         </filters>
         <object>CampaignMember</object>

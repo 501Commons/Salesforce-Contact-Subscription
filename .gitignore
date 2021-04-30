@@ -23,3 +23,4 @@ test_results*
 /src.orig
 /debug.log
 .sfdx/tools/apex.db
+.sfdx/*

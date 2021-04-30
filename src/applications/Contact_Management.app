@@ -24,7 +24,6 @@
     <tabs>standard-Account</tabs>
     <tabs>standard-Lead</tabs>
     <tabs>standard-Campaign</tabs>
-    <tabs>standard-File</tabs>
     <tabs>standard-report</tabs>
     <tabs>standard-Dashboard</tabs>
     <uiType>Lightning</uiType>
